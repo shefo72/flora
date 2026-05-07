@@ -1,15 +1,14 @@
 "use client";
 
 import { Edit, Trash2 } from "lucide-react";
-import { products as initialProducts } from "@/app/data/products";
+import { products as initialProducts } from "@/data/products";
 import { useState } from "react";
 
-import DeleteModal from "@/app/components/DeleteModal";
-import EditProductModal from "@/app/components/EditProductModal";
-import AddProductModal from "@/app/components/AddProductModal";
+import DeleteModal from "@/components/DeleteModal";
+import EditProductModal from "@/components/EditProductModal";
+import AddProductModal from "@/components/AddProductModal";
 
 export default function ProductsPage() {
-
   // products state
   const [productList, setProductList] = useState(initialProducts);
 
@@ -41,102 +40,85 @@ export default function ProductsPage() {
 
   //  delete product
   const handleDelete = () => {
-    setProductList((prev) =>
-      prev.filter((p) => p.product_id !== selectedId)
-    );
+    setProductList((prev) => prev.filter((p) => p.id !== selectedId));
 
     setOpen(false);
     setSelectedId(null);
   };
 
   //  save edited product
- const handleSave = (updated: any) => {
-  setProductList((prev) =>
-    prev.map((p) =>
-      p.product_id === updated.product_id
-        ? { ...p, ...updated }   
-        : p
-    )
-  );
-};
+  const handleSave = (updated: any) => {
+    setProductList((prev) =>
+      prev.map((p) => (p.id === updated.product_id ? { ...p, ...updated } : p)),
+    );
+  };
 
   const handleAdd = (newProduct: any) => {
-  setProductList((prev) => [...prev, newProduct]);
-};
+    setProductList((prev) => [...prev, newProduct]);
+  };
 
   return (
     <div>
-
       {/* Header */}
       <div className="flex justify-between p-3 items-center">
-
-        <h1 className="text-2xl font-bold text-[#3E6C4D]">
+        <h1 className="text-2xl font-bold text-flora-green">
           Products Management
         </h1>
 
-        <button  onClick={() => setAddOpen(true)}
-        className="bg-[#C8E6C9] text-[#4E6851] px-4 py-2 rounded-full hover:bg-[#2f5240] hover:text-white transition">
+        <button
+          onClick={() => setAddOpen(true)}
+          className="bg-[#C8E6C9] cursor-pointer text-[#4E6851] px-4 py-2 rounded-full hover:bg-[#2f5240] hover:text-white transition"
+        >
           Add Product +
         </button>
-
       </div>
 
       {/* Table */}
       <table className="w-full border rounded-lg overflow-hidden">
-
         {/* Header */}
-        <thead className="bg-[#3E6C4D42] text-[#3E6C4D] text-left text-xl">
+        <thead className="bg-[#3E6C4D42] text-flora-green text-left text-xl">
           <tr>
             <th className="p-3">Product Name</th>
             <th className="p-3">Category</th>
             <th className="p-3">Price</th>
-            <th className="p-3">Status</th>
+            {/* <th className="p-3">Status</th> */}
             <th className="p-3">Actions</th>
           </tr>
         </thead>
 
         {/* Body */}
         <tbody className="text-[#434842]">
-
           {productList.map((product) => (
-            <tr key={product.product_id} className="border-t">
-
+            <tr key={product.id} className="border-t">
               {/* Name */}
-              <td className="p-3 font-medium">
-                {product.product_name}
-              </td>
+              <td className="p-3 font-medium">{product.title}</td>
 
               {/* Category */}
-              <td className="p-3">
-                {product.category_name}
-              </td>
+              <td className="p-3">{product.category}</td>
 
               {/* Price */}
-              <td className="p-3">
-                ${product.base_price}
-              </td>
+              <td className="p-3">${product.price}</td>
 
               {/* Status */}
-              <td className="p-3">
+              {/* <td className="p-3">
                 <span
                   className={`px-3 py-1 rounded-full text-sm ${getStatusStyle(
-                    product.status
+                    product.status,
                   )}`}
                 >
                   {product.status || "No status"}
                 </span>
-              </td>
+              </td> */}
 
               {/* Actions */}
               <td className="p-3 flex gap-3">
-
                 {/* Edit */}
                 <button
                   onClick={() => {
                     setSelectedProduct(product);
                     setEditOpen(true);
                   }}
-                  className="text-[#737971] hover:text-blue-700"
+                  className="text-[#737971] hover:text-blue-700 cursor-pointer"
                 >
                   <Edit size={18} />
                 </button>
@@ -144,21 +126,17 @@ export default function ProductsPage() {
                 {/* Delete */}
                 <button
                   onClick={() => {
-                    setSelectedId(product.product_id);
+                    setSelectedId(product.id);
                     setOpen(true);
                   }}
-                  className="text-[#737971] hover:text-red-700"
+                  className="text-[#737971] hover:text-red-700 cursor-pointer"
                 >
                   <Trash2 size={18} />
                 </button>
-
               </td>
-
             </tr>
           ))}
-
         </tbody>
-
       </table>
 
       {/* Delete Modal */}
@@ -176,11 +154,11 @@ export default function ProductsPage() {
         onSave={handleSave}
       />
 
-     <AddProductModal
-  open={addOpen}
-  onClose={() => setAddOpen(false)}
-  onAdd={handleAdd}
-/>
+      <AddProductModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }

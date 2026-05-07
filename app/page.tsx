@@ -1,16 +1,18 @@
 import React from "react";
-import Hero from '../app/Home/hero';
-import Collection from '../app/Home/collection';
-import About from '../app/Home/about';
-import ProductSection from '../app/Home/productSection';
-import NewsLetter from '../app/Home/newsLetter';
+import Hero from "./_Home/hero";
+import Collection from "./_Home/collection";
+import About from "./_Home/about";
+import ProductSection from "./_Home/productSection";
+import NewsLetter from "./_Home/newsLetter";
 
 export default function Page() {
-  return <>
-    <Hero />
-    <Collection />  
-    <About />
-    <ProductSection />
-    <NewsLetter />
-  </>
+  return (
+    <>
+      <Hero />
+      <Collection />
+      <About />
+      <ProductSection />
+      <NewsLetter />
+    </>
+  );
 }
