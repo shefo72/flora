@@ -5,7 +5,12 @@ import { Search } from "lucide-react";
 import { products } from "@/data/products";
 import ProductCard from "@/components/ui/ProductCard";
 
-const categories = ["ALL FLOWERS", "Wildflower", "Wedding", "SEASONAL"];
+const categories = [
+  "ALL FLOWERS",
+  "MONO-BOUQUETS",
+  "BRIDAL BOUQUETS",
+  "SEASONAL",
+];
 
 export default function Page() {
   const [search, setSearch] = useState("");
@@ -14,9 +19,11 @@ export default function Page() {
   const filteredProducts = products.filter((p) => {
     const matchCategory =
       selectedCategory === "ALL FLOWERS" ||
-      p.category?.toUpperCase() === selectedCategory;
+      p.category_name?.toUpperCase() === selectedCategory;
 
-    const matchSearch = p.title?.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = p.product_name
+      ?.toLowerCase()
+      .includes(search.toLowerCase());
 
     return matchCategory && matchSearch;
   });
@@ -73,7 +80,7 @@ export default function Page() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.product_id} product={product} />
             ))
           ) : (
             <div className="col-span-full text-center py-12 text-gray-500">

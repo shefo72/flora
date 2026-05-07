@@ -2,11 +2,12 @@ import { formatCurrency } from "@/lib/utils";
 import Image, { StaticImageData } from "next/image";
 
 interface Product {
-  id: number;
-  image: string | StaticImageData;
-  title: string;
-  category: string;
-  description: string;
+  product_id: number;
+  image_url: string | StaticImageData;
+  product_name: string;
+  category_name: string;
+  collection?: string;
+  description: string | null;
   price: number | string;
   badge?: string | null;
   onAddToCart?: () => void;
@@ -17,14 +18,15 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { image, title, description, price, badge, onAddToCart } = product;
+  const { image_url, product_name, description, price, badge, onAddToCart } =
+    product;
 
   return (
     <div className="group flex flex-col items-center text-center bg-transparent w-full h-full">
       <div className="relative overflow-hidden rounded-md mb-5 w-full aspect-4/5 cursor-pointer shrink-0">
         <Image
-          src={image}
-          alt={title}
+          src={image_url}
+          alt={`${product_name}`}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
         />
@@ -37,7 +39,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       <h3 className="font-serif text-2xl text-gray-900 mb-2 cursor-pointer hover:text-flora-green transition-colors">
-        {title}
+        {product_name}
       </h3>
 
       <p className="text-gray-500 text-sm mb-4 max-w-[90%] leading-relaxed">

@@ -3,12 +3,12 @@
 import React from "react";
 import Head from "next/head";
 import Image from "next/image";
-import signupImage from "../../public/assets/images/signImage.webp";
+import signupImage from "../../../public/assets/images/signImage.webp";
 import Link from "next/link";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { LoginFormValues, loginSchema } from "../../schema/login.schema";
+import { LoginFormValues, loginSchema } from "../../../schema/login.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import loginAction from "../../server/login.server";
+import loginAction from "../../../server/login.server";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { setAuthInfo } from "@/store/authSlice";

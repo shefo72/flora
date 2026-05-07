@@ -128,4 +128,28 @@
   html {
     @apply font-sans;
   }
+
+  ::selection {
+    background-color: #3e6c4d;
+    color: #fcfbf8;
+  }
+
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgb(255, 255, 255);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #7a907a;
+    border-radius: 10px;
+    border: 2px solid #fcfbf8;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #3e6c4d;
+  }
 }

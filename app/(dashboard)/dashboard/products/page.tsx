@@ -38,9 +38,8 @@ export default function ProductsPage() {
     }
   };
 
-  //  delete product
   const handleDelete = () => {
-    setProductList((prev) => prev.filter((p) => p.id !== selectedId));
+    setProductList((prev) => prev.filter((p) => p.product_id !== selectedId));
 
     setOpen(false);
     setSelectedId(null);
@@ -49,7 +48,7 @@ export default function ProductsPage() {
   //  save edited product
   const handleSave = (updated: any) => {
     setProductList((prev) =>
-      prev.map((p) => (p.id === updated.product_id ? { ...p, ...updated } : p)),
+      prev.map((p) => (p.product_id === updated.product_id ? { ...p, ...updated } : p)),
     );
   };
 
@@ -89,12 +88,12 @@ export default function ProductsPage() {
         {/* Body */}
         <tbody className="text-[#434842]">
           {productList.map((product) => (
-            <tr key={product.id} className="border-t">
+            <tr key={product.product_id} className="border-t">
               {/* Name */}
-              <td className="p-3 font-medium">{product.title}</td>
+              <td className="p-3 font-medium">{product.product_name}</td>
 
               {/* Category */}
-              <td className="p-3">{product.category}</td>
+              <td className="p-3">{product.category_name}</td>
 
               {/* Price */}
               <td className="p-3">${product.price}</td>
@@ -126,7 +125,7 @@ export default function ProductsPage() {
                 {/* Delete */}
                 <button
                   onClick={() => {
-                    setSelectedId(product.id);
+                    setSelectedId(product.product_id);
                     setOpen(true);
                   }}
                   className="text-[#737971] hover:text-red-700 cursor-pointer"

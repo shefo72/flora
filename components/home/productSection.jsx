@@ -1,73 +1,11 @@
 import React from "react";
-import card1 from "../../public/assets/images/card1.webp";
-import card2 from "../../public/assets/images/card2.webp";
-import card3 from "../../public/assets/images/card3.jpg";
 import Link from "next/link";
 import ProductCard from "@/components/ui/ProductCard";
 
-const products = [
-  {
-    id: 1,
-    image: card1,
-    title: "The Blushing Aura",
-    subtitle: "Ranunculus & Dusty Miller",
-    description:
-      "A soft romantic bouquet designed with delicate ranunculus and natural dusty miller for an elegant fresh feel.",
-    price: 85.0,
-    badge: "NEW ARRIVAL",
-  },
-  {
-    id: 2,
-    image: card2,
-    title: "Wild Woodland",
-    subtitle: "Eucalyptus & White Lisianthus",
-    description:
-      "A wild-inspired arrangement combining fresh eucalyptus with soft white lisianthus for a natural look.",
-    price: 72.0,
-    badge: null,
-  },
-  {
-    id: 3,
-    image: card3,
-    title: "Sunset Glow",
-    subtitle: "Dahlias & Golden Solidago",
-    description:
-      "A warm seasonal bouquet featuring vibrant dahlias mixed with golden solidago tones.",
-    price: 94.0,
-    badge: "SEASONAL",
-  },
-  {
-    id: 4,
-    image: card1,
-    title: "The Blushing Aura",
-    subtitle: "Ranunculus & Dusty Miller",
-    description:
-      "A soft romantic bouquet designed with delicate ranunculus and natural dusty miller for an elegant fresh feel.",
-    price: 85.0,
-    badge: "NEW ARRIVAL",
-  },
-  {
-    id: 5,
-    image: card2,
-    title: "Wild Woodland",
-    subtitle: "Eucalyptus & White Lisianthus",
-    description:
-      "A wild-inspired arrangement combining fresh eucalyptus with soft white lisianthus for a natural look.",
-    price: 72.0,
-    badge: null,
-  },
-  {
-    id: 6,
-    image: card3,
-    title: "Sunset Glow",
-    subtitle: "Dahlias & Golden Solidago",
-    description:
-      "A warm seasonal bouquet featuring vibrant dahlias mixed with golden solidago tones.",
-    price: 94.0,
-    badge: "SEASONAL",
-  },
-];
+import { products as allProducts } from "@/data/products";
+
 export default function ProductSection() {
+  const products = allProducts.slice(0, 6);
   return (
     <>
       <section className="bg-stone-50 px-6 md:px-12 py-16">
@@ -91,7 +29,7 @@ export default function ProductSection() {
 
           <div className="grid md:grid-cols-3 gap-y-20 gap-x-6">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.product_id} product={product} />
             ))}
           </div>
         </div>

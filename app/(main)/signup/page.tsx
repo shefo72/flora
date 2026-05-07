@@ -3,11 +3,11 @@
 import React from "react";
 import Head from "next/head";
 import Image from "next/image";
-import signupImage from "../../public/assets/images/signImage.webp";
+import signupImage from "../../../public/assets/images/signImage.webp";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SignupFormValues, SignupSchema } from "../../schema/signup.schema";
-import signupAction from "../../server/signup.server";
+import { SignupFormValues, SignupSchema } from "../../../schema/signup.schema";
+import signupAction from "../../../server/signup.server";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
