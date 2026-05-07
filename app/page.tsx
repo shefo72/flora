@@ -1,9 +1,9 @@
 import React from "react";
-import Hero from "./_Home/hero";
-import Collection from "./_Home/collection";
-import About from "./_Home/about";
-import ProductSection from "./_Home/productSection";
-import NewsLetter from "./_Home/newsLetter";
+import Hero from "@/components/home/hero";
+import Collection from "@/components/home/collection";
+import About from "@/components/home/about";
+import ProductSection from "@/components/home/productSection";
+import NewsLetter from "@/components/home/newsLetter";
 
 export default function Page() {
   return (

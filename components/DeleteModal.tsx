@@ -24,18 +24,22 @@ export default function DeleteModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
-
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">Delete Product ?</DialogTitle>
+          <DialogTitle className="text-center text-2xl">
+            Delete Product ?
+          </DialogTitle>
         </DialogHeader>
 
         <p className="text-[#434842] text-center text-xl">
-         This action cannot be undone
+          This action cannot be undone
         </p>
 
         <DialogFooter className="flex gap-2 justify-end">
-
-          <Button variant="outline" onClick={onClose} className="rounded-full  bg-[#EFEDED] text-[#434842]">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="rounded-full  bg-[#EFEDED] text-[#434842]"
+          >
             Cancel
           </Button>
 
@@ -45,9 +49,7 @@ export default function DeleteModal({
           >
             Delete
           </Button>
-
         </DialogFooter>
-
       </DialogContent>
     </Dialog>
   );

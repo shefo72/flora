@@ -1,7 +1,7 @@
 "use server";
 
 import { LoginFormValues, loginSchema } from "../schema/login.schema";
-import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, isAxiosError } from "axios";
 
 export default async function loginAction(values: LoginFormValues) {
   const validationResult = loginSchema.safeParse(values);
@@ -67,7 +67,7 @@ export default async function loginAction(values: LoginFormValues) {
   } catch (error) {
     console.error("Error:", error);
 
-    if (error instanceof AxiosError) {
+    if (isAxiosError(error)) {
       const errorData = error.response?.data;
       console.log("Error data:", errorData);
 

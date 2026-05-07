@@ -2,8 +2,10 @@ import { formatCurrency } from "@/lib/utils";
 import Image, { StaticImageData } from "next/image";
 
 interface Product {
+  id: number;
   image: string | StaticImageData;
   title: string;
+  category: string;
   description: string;
   price: number | string;
   badge?: string | null;

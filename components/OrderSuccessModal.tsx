@@ -22,7 +22,6 @@ export default function OrderSuccessModal({ open, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-3xl shadow-2xl p-10 w-80 text-center"
       >
-
         {/* ICON */}
         <div className="flex items-center justify-center gap-2 mb-6">
           <svg
@@ -58,9 +57,7 @@ export default function OrderSuccessModal({ open, onClose }: Props) {
           Order Confirmed
         </p>
 
-        <p className="text-sm text-[#888] mb-8">
-          Want to Buy more Flowers?
-        </p>
+        <p className="text-sm text-[#888] mb-8">Want to Buy more Flowers?</p>
 
         {/* BUTTON */}
         <button

@@ -11,6 +11,8 @@ import signupAction from "../../server/signup.server";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Input } from "@/components/ui/Input";
+import { BrandButton } from "@/components/ui/BrandButton";
 
 export default function SignUp() {
   const router = useRouter();
@@ -85,122 +87,74 @@ export default function SignUp() {
                 onSubmit={handleSubmit(onSubmit)}
               >
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your First Name"
-                      className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                      id="first-name"
-                      {...register("firstName")}
-                    />
-                    {errors.firstName && (
-                      <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                        {errors.firstName.message}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter your Last Name"
-                      className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                      id="last-name"
-                      {...register("lastName")}
-                    />
-                    {errors.lastName && (
-                      <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                        {errors.lastName.message}
-                      </p>
-                    )}
-                  </div>
+                  <Input
+                    label="First Name"
+                    type="text"
+                    id="first-name"
+                    placeholder="Enter your First Name"
+                    {...register("firstName")}
+                    error={errors.firstName}
+                  />
+                  <Input
+                    label="Last Name"
+                    type="text"
+                    id="last-name"
+                    placeholder="Enter your Last Name"
+                    {...register("lastName")}
+                    error={errors.lastName}
+                  />
                 </div>
 
+                <Input
+                  label="Email Address"
+                  type="email"
+                  id="email"
+                  placeholder="Enter your email"
+                  {...register("email")}
+                  error={errors.email}
+                />
+
+                <Input
+                  label="Phone"
+                  type="tel"
+                  id="phone"
+                  placeholder="Enter your phone number"
+                  {...register("phone")}
+                  error={errors.phone}
+                />
+
                 <div>
-                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                    id="email"
-                    {...register("email")}
+                  <Input
+                    label="Birthday"
+                    type="date"
+                    id="birthday"
+                    placeholder="Select your birthday"
+                    className="pr-10"
+                    {...register("birthday")}
+                    error={errors.birthday}
                   />
-                  {errors.email && (
-                    <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                      {errors.email.message}
+                  {!errors.birthday && (
+                    <p className="mt-1 text-[10px] text-[#8B8B8B] lg:text-xs">
+                      must be a valid date.
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="Enter your phone number"
-                    className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                    id="phone"
-                    {...register("phone")}
+                  <Input
+                    label="Password"
+                    type="password"
+                    id="password"
+                    placeholder="Enter your password"
+                    className="pr-10"
+                    {...register("password")}
+                    error={errors.password}
                   />
-                  {errors.phone && (
-                    <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                      {errors.phone.message}
+                  {!errors.password && (
+                    <p className="mt-1 text-[10px] text-[#8B8B8B] lg:text-xs">
+                      Must be at least 8 characters long.
                     </p>
                   )}
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                    Birthday
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      placeholder="Select your birthday"
-                      className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 pr-10 text-sm text-[#2D2D2D] outline-none transition-colors focus:border-[#4A5D4A]"
-                      id="birthday"
-                      {...register("birthday")}
-                    />
-                    {errors.birthday && (
-                      <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                        {errors.birthday.message}
-                      </p>
-                    )}
-                  </div>
-                  <p className="mt-1 text-[10px] text-[#8B8B8B] lg:text-xs">
-                    must be a valid date.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      placeholder="Enter your password"
-                      className="w-full border-b border-[#D4D4D4] bg-transparent pb-2 pr-10 text-sm text-[#2D2D2D] outline-none transition-colors focus:border-[#4A5D4A]"
-                      id="password"
-                      {...register("password")}
-                    />
-                    {errors.password && (
-                      <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </div>
-                  <p className="mt-1 text-[10px] text-[#8B8B8B] lg:text-xs">
-                    Must be at least 8 characters long.
-                  </p>
                 </div>
 
                 {/* <div className="flex items-start gap-2 pt-1 lg:gap-3 lg:pt-2">
@@ -217,12 +171,7 @@ export default function SignUp() {
                 </div>
                     {errors.terms && <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">{errors.terms.message}</p>} */}
 
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#4A5D4A] hover:bg-[#76ae76]  py-3 text-sm font-medium text-white lg:py-3.5"
-                >
-                  Create Account
-                </button>
+                <BrandButton type="submit">Create Account</BrandButton>
 
                 <div className="relative flex items-center py-1 lg:py-2">
                   <div className="grow border-t border-[#E0E0E0]"></div>

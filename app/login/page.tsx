@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { setAuthInfo } from "@/store/authSlice";
 import { useDispatch } from "react-redux";
+import { Input } from "@/components/ui/Input";
+import { BrandButton } from "@/components/ui/BrandButton";
 // import { AppState } from '../../store/store';
 
 export default function Login() {
@@ -97,25 +99,21 @@ export default function Login() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label className="mb-2 block text-xs font-medium text-[#4A4A4A]">
-                Email Address
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border-b border-[#D4D4D4] bg-transparent pb-3 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                id="email"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
+            <Input
+              label="Email Address"
+              type="email"
+              id="email"
+              placeholder="Enter your email"
+              {...register("email")}
+              error={errors.email}
+            />
 
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-xs font-medium text-[#4A4A4A]">
+                <label
+                  className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs"
+                  htmlFor="password"
+                >
                   Password
                 </label>
                 <a
@@ -125,15 +123,19 @@ export default function Login() {
                   Forgot Password?
                 </a>
               </div>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="w-full border-b border-[#D4D4D4] bg-transparent pb-3 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A]"
-                id="password"
-                {...register("password")}
-              />
+              <div className="relative">
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  className={`w-full border-b border-[#D4D4D4] bg-transparent pb-2 text-sm text-[#2D2D2D] placeholder-[#A0A0A0] outline-none transition-colors focus:border-[#4A5D4A] ${
+                    errors.password ? "border-red-400 focus:border-red-500" : ""
+                  }`}
+                  id="password"
+                  {...register("password")}
+                />
+              </div>
               {errors.password && (
-                <p className="text-xs text-red-500">
+                <p className="mt-0.5 text-[10px] text-red-500/90 lg:text-xs">
                   {errors.password.message}
                 </p>
               )}
@@ -166,10 +168,7 @@ export default function Login() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#4C6247] py-3.5 text-sm font-medium text-white transition-colors hover:bg-[#5A7A5A]"
-            >
+            <BrandButton type="submit">
               Sign In
               <svg
                 className="h-4 w-4"
@@ -184,7 +183,7 @@ export default function Login() {
                   d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
                 />
               </svg>
-            </button>
+            </BrandButton>
           </form>
 
           <div className="my-6 border-t border-[#F0F0F0]"></div>

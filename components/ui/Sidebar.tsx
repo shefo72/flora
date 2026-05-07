@@ -13,11 +13,9 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 h-screen bg-white border-r p-4">
-
       {/* <h2 className="text-xl font-bold mb-6">Dashboard</h2> */}
 
       <div className="flex flex-col gap-2">
-
         <Link
           href="/dashboard/orders"
           className={`p-2 rounded ${linkStyle("/dashboard/orders")}`}
@@ -31,7 +29,6 @@ export default function Sidebar() {
         >
           Products
         </Link>
-
       </div>
     </div>
   );
