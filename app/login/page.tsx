@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import loginAction from "../../server/login.server";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { setAuthInfo } from "../store/authSlice";
+import { setAuthInfo } from "@/store/authSlice";
 import { useDispatch } from "react-redux";
 // import { AppState } from '../../store/store';
 

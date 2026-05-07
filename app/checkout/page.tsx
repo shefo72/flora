@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useCart } from "@/app/context/CartContext";
+import { useCart } from "@/context/CartContext";
 import { useState } from "react";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Image from "next/image";
@@ -15,7 +15,7 @@ export default function CheckoutPage() {
   );
 
   const shipping = 0;
-  const tax = subtotal * 0.3; // تقدري تغيريها
+  const tax = subtotal * 0.3;
   const total = subtotal + tax + shipping;
 
   const [form, setForm] = useState({
