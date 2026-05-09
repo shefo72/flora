@@ -1,16 +1,27 @@
 "use client";
-import React from "react";
-import { useCart } from "@/context/CartContext";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { AppState, AppDispatch } from "@/store/store";
+import { clearCart } from "@/store/cartSlice";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckoutFormSchema, CheckoutFormValues } from "@/schemas/api.schema";
+import { api } from "@/lib/axios";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
-  const { cart } = useCart();
+  const { items: cart } = useSelector((state: AppState) => state.cart);
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.base_price * item.quantity,
+    (sum, item) => sum + (Number(item.price) || 0) * item.quantity,
     0,
   );
 
@@ -18,25 +29,39 @@ export default function CheckoutPage() {
   const tax = subtotal * 0.3;
   const total = subtotal + tax + shipping;
 
-  const [form, setForm] = useState({
-    cardName: "",
-    cardNumber: "",
-    fullName: "",
-    phone: "",
-    date: "",
-    address: "",
-    city: "",
-    expiry: "",
-    cvv: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckoutFormValues>({
+    resolver: zodResolver(CheckoutFormSchema),
   });
 
-  const handleChange = (key: string, value: string) => {
-    setForm({ ...form, [key]: value });
-  };
+  const onSubmit = async (data: CheckoutFormValues) => {
+    if (cart.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
 
-  const handleSubmit = () => {
-    console.log("ORDER:", { form, cart, total });
-    alert("Order placed successfully 🎉");
+    setIsSubmitting(true);
+    try {
+      // POST to /checkout.php using Axios
+      await api.post("/checkout.php", {
+        ...data,
+        cartItems: cart,
+        total: total,
+      });
+
+      // On success: clear Redux cart, show success Toast
+      dispatch(clearCart());
+      toast.success("Order placed successfully 🎉");
+      setOpen(true); // show modal
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to place order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -46,97 +71,96 @@ export default function CheckoutPage() {
         <div className="flex-1">
           <h1 className="text-4xl font-semibold mb-8">Payment Details</h1>
 
-          <div className="space-y-5">
-            {/* Cardholder */}
-            <div>
-              <label className="block text-sm mb-1">Cardholder Name</label>
-              <input
-                className="border p-2 w-full rounded"
-                placeholder="Florence Nightingale"
-                value={form.cardName}
-                onChange={(e) => handleChange("cardName", e.target.value)}
-              />
+          <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* First Name & Last Name */}
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm mb-1">First Name</label>
+                <input
+                  {...register("firstName")}
+                  className={`border p-2 w-full rounded ${errors.firstName ? 'border-red-500' : ''}`}
+                  placeholder="Florence"
+                />
+                {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm mb-1">Last Name</label>
+                <input
+                  {...register("lastName")}
+                  className={`border p-2 w-full rounded ${errors.lastName ? 'border-red-500' : ''}`}
+                  placeholder="Nightingale"
+                />
+                {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>}
+              </div>
             </div>
 
-            {/* Card Number */}
+            {/* Email */}
             <div>
-              <label className="block text-sm mb-1">Card Number</label>
+              <label className="block text-sm mb-1">Email</label>
               <input
-                className="border p-2 w-full rounded"
-                placeholder="0000 0000 0000 0000"
-                value={form.cardNumber}
-                onChange={(e) => handleChange("cardNumber", e.target.value)}
+                {...register("email")}
+                className={`border p-2 w-full rounded ${errors.email ? 'border-red-500' : ''}`}
+                placeholder="example@example.com"
               />
-            </div>
-
-            {/* Full Name */}
-            <div>
-              <label className="block text-sm mb-1">Full Name</label>
-              <input
-                className="border p-2 w-full rounded"
-                placeholder="Recipient name"
-                value={form.fullName}
-                onChange={(e) => handleChange("fullName", e.target.value)}
-              />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
 
             {/* Phone */}
             <div>
               <label className="block text-sm mb-1">Phone</label>
               <input
-                className="border p-2 w-full rounded"
-                value={form.phone}
-                onChange={(e) => handleChange("phone", e.target.value)}
+                {...register("phone")}
+                className={`border p-2 w-full rounded ${errors.phone ? 'border-red-500' : ''}`}
+                placeholder="+1 234 567 8900"
               />
-            </div>
-
-            {/* Date */}
-            <div>
-              <label className="block text-sm mb-1">Delivery Date</label>
-              <input
-                className="border p-2 w-full rounded"
-                value={form.date}
-                onChange={(e) => handleChange("date", e.target.value)}
-              />
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
             </div>
 
             {/* Address */}
             <div>
               <label className="block text-sm mb-1">Address</label>
               <input
-                className="border p-2 w-full rounded"
-                value={form.address}
-                onChange={(e) => handleChange("address", e.target.value)}
+                {...register("address")}
+                className={`border p-2 w-full rounded ${errors.address ? 'border-red-500' : ''}`}
+                placeholder="123 Main St"
               />
+              {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
             </div>
 
-            {/* City */}
-            <div>
-              <label className="block text-sm mb-1">City</label>
-              <input
-                className="border p-2 w-full rounded"
-                value={form.city}
-                onChange={(e) => handleChange("city", e.target.value)}
-              />
-            </div>
-
-            {/* Expiry + CVV */}
+            {/* City & Zip Code */}
             <div className="flex gap-4">
-              <input
-                className="border p-2 w-full rounded"
-                placeholder="MM/YY"
-                value={form.expiry}
-                onChange={(e) => handleChange("expiry", e.target.value)}
-              />
-              <input
-                className="border p-2 w-full rounded"
-                placeholder="CVV"
-                type="password"
-                value={form.cvv}
-                onChange={(e) => handleChange("cvv", e.target.value)}
-              />
+              <div className="flex-1">
+                <label className="block text-sm mb-1">City</label>
+                <input
+                  {...register("city")}
+                  className={`border p-2 w-full rounded ${errors.city ? 'border-red-500' : ''}`}
+                  placeholder="New York"
+                />
+                {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm mb-1">Zip Code</label>
+                <input
+                  {...register("zipCode")}
+                  className={`border p-2 w-full rounded ${errors.zipCode ? 'border-red-500' : ''}`}
+                  placeholder="10001"
+                />
+                {errors.zipCode && <p className="text-red-500 text-xs mt-1">{errors.zipCode.message}</p>}
+              </div>
             </div>
-          </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm mb-1">Order Notes (Optional)</label>
+              <textarea
+                {...register("notes")}
+                className="border p-2 w-full rounded"
+                placeholder="Any special instructions?"
+                rows={3}
+              />
+              {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
+            </div>
+          </form>
         </div>
 
         {/* RIGHT - SUMMARY */}
@@ -149,18 +173,20 @@ export default function CheckoutPage() {
               {cart.map((item) => (
                 <div key={item.product_id} className="flex gap-3">
                   <Image
-                    src={item.image_url}
-                    alt={item.product_name}
+                    src={item.image || "https://placehold.co/100"} // fallback if image is missing
+                    alt={item.name || "Product"}
+                    width={56}
+                    height={56}
                     className="w-14 h-14 rounded object-cover"
                   />
 
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{item.product_name}</p>
+                    <p className="text-sm font-medium">{item.name}</p>
 
                     <p className="text-xs text-gray-500">x{item.quantity}</p>
 
                     <p className="text-sm font-semibold">
-                      ${(item.base_price * item.quantity).toFixed(2)}
+                      ${((Number(item.price) || 0) * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -192,14 +218,26 @@ export default function CheckoutPage() {
 
             {/* Button */}
             <button
-              onClick={() => setOpen(true)}
-              className="mt-5 w-full bg-flora-green text-white py-3 rounded-xl"
+              type="submit"
+              form="checkout-form"
+              disabled={isSubmitting || cart.length === 0}
+              className="mt-5 w-full bg-flora-green text-white py-3 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2"
             >
-              Place Order (${total.toFixed(2)})
+              {isSubmitting ? (
+                <>
+                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5" />
+                  Processing...
+                </>
+              ) : (
+                `Place Order ($${total.toFixed(2)})`
+              )}
             </button>
           </div>
         </div>
-        <OrderSuccessModal open={open} onClose={() => setOpen(false)} />
+        <OrderSuccessModal open={open} onClose={() => {
+          setOpen(false);
+          router.push("/");
+        }} />
       </div>
     </main>
   );

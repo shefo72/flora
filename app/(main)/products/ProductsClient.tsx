@@ -12,9 +12,7 @@ export default function ProductsClient({
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL FLOWERS");
 
-  const safeProducts = Array.isArray(initialProducts) ? initialProducts : [];
-
-  const filteredProducts = safeProducts.filter((p) => {
+  const filteredProducts = initialProducts.filter((p) => {
     const matchCategory =
       selectedCategory === "ALL FLOWERS" ||
       p.category_name?.toUpperCase() === selectedCategory;

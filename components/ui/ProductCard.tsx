@@ -1,6 +1,6 @@
 import { formatCurrency } from "@/lib/utils";
 import Image, { StaticImageData } from "next/image";
-
+import img from "../../public/assets/images/4.webp";
 interface Product {
   product_id: number;
   image_url: string | StaticImageData;
@@ -25,7 +25,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="group flex flex-col items-center text-center bg-transparent w-full h-full">
       <div className="relative overflow-hidden rounded-md mb-5 w-full aspect-4/5 cursor-pointer shrink-0">
         <Image
-          src={image_url}
+          src={img}
           alt={`${product_name}`}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"

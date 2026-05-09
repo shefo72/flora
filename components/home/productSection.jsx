@@ -2,10 +2,12 @@ import React from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ui/ProductCard";
 
-import { products as allProducts } from "@/data/products";
+import { getProducts } from "@/server/products.server";
 
-export default function ProductSection() {
+export default async function ProductSection() {
+  const allProducts = await getProducts();
   const products = allProducts.slice(0, 6);
+
   return (
     <>
       <section className="bg-stone-50 px-6 md:px-12 py-16">

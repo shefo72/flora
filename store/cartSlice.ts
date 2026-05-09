@@ -15,6 +15,17 @@ const initialState: CartState = {
   error: null,
 };
 
+// Helper to map API cart items to our local schema
+const mapCartItem = (item: any): CartItem => ({
+  cart_id: item.cart_id,
+  customer_id: item.customer_id,
+  product_id: item.product_id,
+  quantity: item.quantity,
+  name: item.name ?? item.product_name,
+  price: item.price ?? item.base_price ?? 0,
+  image: item.image ?? item.image_url,
+});
+
 // --- Thunks ---
 
 // GET /cart.php?customer_id={id}
@@ -24,8 +35,15 @@ export const fetchCart = createAsyncThunk<CartItem[], string | number>(
     try {
       const response = await api.get(`/cart.php?customer_id=${customerId}`);
       const data = response.data;
-      if (Array.isArray(data)) return data;
-      return data?.data || data?.items || [];
+      
+      let itemsArray = [];
+      if (Array.isArray(data)) {
+        itemsArray = data;
+      } else {
+        itemsArray = data?.data || data?.items || [];
+      }
+      
+      return itemsArray.map(mapCartItem);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch cart');
     }
@@ -41,9 +59,9 @@ export const addToCart = createAsyncThunk<CartItem, Omit<CartItem, 'cart_id'>>(
       toast.success('Item added to cart!');
       const responseData = response.data;
       if (responseData && typeof responseData === 'object' && 'product_id' in responseData) {
-        return responseData as CartItem;
+        return mapCartItem(responseData);
       }
-      return itemData as CartItem;
+      return mapCartItem(itemData);
     } catch (error: any) {
       toast.error('Failed to add item to cart.');
       return rejectWithValue(error.response?.data?.message || 'Failed to add item to cart');
@@ -59,7 +77,6 @@ export const updateCartQuantity = createAsyncThunk<
 >(
   'cart/updateCartQuantity',
   async (arg, { rejectWithValue, getState }) => {
-    // Save original item for potential rollback
     const state = getState() as { cart: CartState };
     const originalItem = state.cart.items.find(
       i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
@@ -70,7 +87,6 @@ export const updateCartQuantity = createAsyncThunk<
       return response.data;
     } catch (error: any) {
       toast.error('Failed to update quantity.');
-      // Return original item to revert the optimistic update
       return rejectWithValue(originalItem as CartItem);
     }
   }
@@ -84,7 +100,6 @@ export const removeFromCart = createAsyncThunk<
 >(
   'cart/removeFromCart',
   async (arg, { rejectWithValue, getState }) => {
-    // Save original item for potential rollback
     const state = getState() as { cart: CartState };
     const originalItem = state.cart.items.find(
       i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
@@ -96,7 +111,6 @@ export const removeFromCart = createAsyncThunk<
       return arg;
     } catch (error: any) {
       toast.error('Failed to remove item.');
-      // Return original item to revert the optimistic removal
       return rejectWithValue(originalItem as CartItem);
     }
   }
@@ -152,7 +166,6 @@ const cartSlice = createSlice({
         }
       })
       .addCase(updateCartQuantity.rejected, (state, action) => {
-        // Rollback on failure
         if (action.payload) {
           const originalItem = action.payload;
           const item = state.items.find(
@@ -167,13 +180,11 @@ const cartSlice = createSlice({
       // OPTIMISTIC UPDATE: removeFromCart
       .addCase(removeFromCart.pending, (state, action) => {
         const { cart_id, product_id } = action.meta.arg;
-        // Optimistically remove
         state.items = state.items.filter(
           i => !((cart_id && i.cart_id === cart_id) || i.product_id === product_id)
         );
       })
       .addCase(removeFromCart.rejected, (state, action) => {
-        // Rollback on failure
         if (action.payload) {
           state.items.push(action.payload);
         }

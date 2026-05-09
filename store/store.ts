@@ -1,16 +1,13 @@
 import { authReducer, AuthState } from "./authSlice";
+import cartReducer, { CartState } from "./cartSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
-type PreloadedState = {
-  auth: AuthState;
-};
-
-export function makeStore(preloadedState?: PreloadedState) {
+export function makeStore() {
   const store = configureStore({
     reducer: {
       auth: authReducer,
+      cart: cartReducer,
     },
-    preloadedState,
   });
 
   return store;
@@ -20,3 +17,4 @@ export const store = makeStore();
 
 export type AppStore = ReturnType<typeof makeStore>;
 export type AppState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = typeof store.dispatch;
