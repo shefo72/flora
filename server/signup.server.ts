@@ -3,6 +3,8 @@
 import { SignupFormValues, SignupSchema } from "../schema/signup.schema";
 import axios, { isAxiosError } from "axios";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default async function signupAction(values: SignupFormValues) {
   const validationResult = SignupSchema.safeParse(values);
 
@@ -25,24 +27,30 @@ export default async function signupAction(values: SignupFormValues) {
       birthday: values.birthday,
     };
 
-    const { data } = await axios.post(
-      "https://velvetbrewapi-production.up.railway.app/api/signup.php",
-      apiData,
-    );
+    const { data } = await axios.post(`${API_BASE_URL}/signup.php`, apiData, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
 
     console.log("API response:", data);
 
-    if (data.message && data.message.toLowerCase().includes("success")) {
+    if (
+      data.success === true ||
+      data.status === "success" ||
+      (data.message && data.message.toLowerCase().includes("success"))
+    ) {
       return {
         success: true,
-        message: data.message,
+        message: data.message || "Account created successfully 🎉",
         data,
       };
     }
 
     return {
       success: false,
-      message: data.message || "Failed to create account.",
+      message: data.message || data.error || "Failed to create account.",
     };
   } catch (error) {
     console.error("API error:", error);
@@ -50,7 +58,10 @@ export default async function signupAction(values: SignupFormValues) {
     if (isAxiosError(error)) {
       return {
         success: false,
-        message: error.response?.data?.message || "Server error.",
+        message:
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Server error occurred.",
       };
     }
 
