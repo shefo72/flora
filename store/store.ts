@@ -1,5 +1,5 @@
-import { authReducer, AuthState } from "./authSlice";
-import cartReducer, { CartState } from "./cartSlice";
+import { authReducer } from "./authSlice";
+import cartReducer from "./cartSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 export function makeStore() {
