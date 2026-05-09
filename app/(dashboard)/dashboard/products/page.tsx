@@ -1,60 +1,52 @@
 "use client";
 
 import { Edit, Trash2 } from "lucide-react";
-import { products as initialProducts } from "@/data/products";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/axios";
 
 import DeleteModal from "@/components/DeleteModal";
 import EditProductModal from "@/components/EditProductModal";
 import AddProductModal from "@/components/AddProductModal";
 
 export default function ProductsPage() {
-  // products state
-  const [productList, setProductList] = useState(initialProducts);
+  const [productList, setProductList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // delete state
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get("/products.php");
+        setProductList(res.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-
-  // edit state
   const [editOpen, setEditOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-
   const [addOpen, setAddOpen] = useState(false);
-  //  status colors
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "in stock":
-        return "bg-[#C8E6C94D] text-[#4A654E]";
 
-      case "low stock":
-        return "bg-[#F5F3F3] text-[#434842]";
-
-      case "out of stock":
-        return "bg-[#FFDAD64D] text-[#BA1A1A]";
-
-      default:
-        return "bg-gray-100 text-gray-700";
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    try {
+      setProductList((prev) => prev.filter((p) => p.product_id !== selectedId));
+      setOpen(false);
+    } catch (error) {
+      alert("Error deleting product");
     }
   };
 
-  const handleDelete = () => {
-    setProductList((prev) => prev.filter((p) => p.product_id !== selectedId));
+  const handleSave = async () => {};
+  const handleAdd = async () => {};
 
-    setOpen(false);
-    setSelectedId(null);
-  };
-
-  //  save edited product
-  const handleSave = (updated: any) => {
-    setProductList((prev) =>
-      prev.map((p) => (p.product_id === updated.product_id ? { ...p, ...updated } : p)),
-    );
-  };
-
-  const handleAdd = (newProduct: any) => {
-    setProductList((prev) => [...prev, newProduct]);
-  };
+  if (isLoading)
+    return <div className="p-10 text-center">Loading Admin Dashboard...</div>;
 
   return (
     <div>
@@ -80,7 +72,7 @@ export default function ProductsPage() {
             <th className="p-3">Product Name</th>
             <th className="p-3">Category</th>
             <th className="p-3">Price</th>
-            {/* <th className="p-3">Status</th> */}
+            <th className="p-3">Status</th>
             <th className="p-3">Actions</th>
           </tr>
         </thead>
@@ -99,15 +91,15 @@ export default function ProductsPage() {
               <td className="p-3">${product.price}</td>
 
               {/* Status */}
-              {/* <td className="p-3">
+              <td className="p-3">
                 <span
-                  className={`px-3 py-1 rounded-full text-sm ${getStatusStyle(
-                    product.status,
-                  )}`}
+                //   className={`px-3 py-1 rounded-full text-sm ${
+                //     product.status,
+                // }`}
                 >
                   {product.status || "No status"}
                 </span>
-              </td> */}
+              </td>
 
               {/* Actions */}
               <td className="p-3 flex gap-3">
