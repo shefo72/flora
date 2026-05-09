@@ -24,11 +24,7 @@ export const fetchCart = createAsyncThunk<CartItem[], string | number>(
     try {
       const response = await api.get(`/cart.php?customer_id=${customerId}`);
       const data = response.data;
-      
-      // Handle potential object wrapping like { data: [...] } or { items: [...] }
-      if (Array.isArray(data)) {
-        return data;
-      }
+      if (Array.isArray(data)) return data;
       return data?.data || data?.items || [];
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch cart');
@@ -43,9 +39,6 @@ export const addToCart = createAsyncThunk<CartItem, Omit<CartItem, 'cart_id'>>(
     try {
       const response = await api.post('/cart.php', itemData);
       toast.success('Item added to cart!');
-      
-      // If the API returns the created item, use it. Otherwise, fallback to the item data sent.
-      // This assumes the API returns the item or at least we have enough data to display it.
       const responseData = response.data;
       if (responseData && typeof responseData === 'object' && 'product_id' in responseData) {
         return responseData as CartItem;
@@ -58,12 +51,67 @@ export const addToCart = createAsyncThunk<CartItem, Omit<CartItem, 'cart_id'>>(
   }
 );
 
+// PUT /cart.php (Update Quantity)
+export const updateCartQuantity = createAsyncThunk<
+  any,
+  { cart_id?: string | number; product_id: string | number; quantity: number },
+  { rejectValue: CartItem }
+>(
+  'cart/updateCartQuantity',
+  async (arg, { rejectWithValue, getState }) => {
+    // Save original item for potential rollback
+    const state = getState() as { cart: CartState };
+    const originalItem = state.cart.items.find(
+      i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
+    );
+
+    try {
+      const response = await api.put('/cart.php', arg);
+      return response.data;
+    } catch (error: any) {
+      toast.error('Failed to update quantity.');
+      // Return original item to revert the optimistic update
+      return rejectWithValue(originalItem as CartItem);
+    }
+  }
+);
+
+// DELETE /cart.php (Remove Item)
+export const removeFromCart = createAsyncThunk<
+  any,
+  { cart_id?: string | number; product_id: string | number },
+  { rejectValue: CartItem }
+>(
+  'cart/removeFromCart',
+  async (arg, { rejectWithValue, getState }) => {
+    // Save original item for potential rollback
+    const state = getState() as { cart: CartState };
+    const originalItem = state.cart.items.find(
+      i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
+    );
+
+    try {
+      await api.delete('/cart.php', { data: arg });
+      toast.success('Item removed from cart.');
+      return arg;
+    } catch (error: any) {
+      toast.error('Failed to remove item.');
+      // Return original item to revert the optimistic removal
+      return rejectWithValue(originalItem as CartItem);
+    }
+  }
+);
+
 // --- Slice ---
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
-  reducers: {},
+  reducers: {
+    clearCart: (state) => {
+      state.items = [];
+    }
+  },
   extraReducers: (builder) => {
     builder
       // fetchCart
@@ -91,8 +139,47 @@ const cartSlice = createSlice({
       .addCase(addToCart.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      
+      // OPTIMISTIC UPDATE: updateCartQuantity
+      .addCase(updateCartQuantity.pending, (state, action) => {
+        const { cart_id, product_id, quantity } = action.meta.arg;
+        const item = state.items.find(
+          i => (cart_id && i.cart_id === cart_id) || i.product_id === product_id
+        );
+        if (item) {
+          item.quantity = quantity; // Optimistically update
+        }
+      })
+      .addCase(updateCartQuantity.rejected, (state, action) => {
+        // Rollback on failure
+        if (action.payload) {
+          const originalItem = action.payload;
+          const item = state.items.find(
+            i => (originalItem.cart_id && i.cart_id === originalItem.cart_id) || i.product_id === originalItem.product_id
+          );
+          if (item) {
+            item.quantity = originalItem.quantity;
+          }
+        }
+      })
+      
+      // OPTIMISTIC UPDATE: removeFromCart
+      .addCase(removeFromCart.pending, (state, action) => {
+        const { cart_id, product_id } = action.meta.arg;
+        // Optimistically remove
+        state.items = state.items.filter(
+          i => !((cart_id && i.cart_id === cart_id) || i.product_id === product_id)
+        );
+      })
+      .addCase(removeFromCart.rejected, (state, action) => {
+        // Rollback on failure
+        if (action.payload) {
+          state.items.push(action.payload);
+        }
       });
   },
 });
 
+export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
