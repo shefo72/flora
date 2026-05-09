@@ -1,193 +1,114 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { api } from '@/lib/axios';
-import { CartItem } from '@/schemas/api.schema';
-import { toast } from 'react-toastify';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { api } from "@/lib/axios";
+import { toast } from "react-toastify";
 
-export interface CartState {
-  items: CartItem[];
-  isLoading: boolean;
-  error: string | null;
-}
-
-const initialState: CartState = {
-  items: [],
-  isLoading: false,
-  error: null,
-};
-
-// Helper to map API cart items to our local schema
-const mapCartItem = (item: any): CartItem => ({
-  cart_id: item.cart_id,
-  customer_id: item.customer_id,
-  product_id: item.product_id,
-  quantity: item.quantity,
-  name: item.name ?? item.product_name,
-  price: item.price ?? item.base_price ?? 0,
-  image: item.image ?? item.image_url,
-});
-
-// --- Thunks ---
-
-// GET /cart.php?customer_id={id}
-export const fetchCart = createAsyncThunk<CartItem[], string | number>(
-  'cart/fetchCart',
-  async (customerId, { rejectWithValue }) => {
-    try {
-      const response = await api.get(`/cart.php?customer_id=${customerId}`);
-      const data = response.data;
-      
-      let itemsArray = [];
-      if (Array.isArray(data)) {
-        itemsArray = data;
-      } else {
-        itemsArray = data?.data || data?.items || [];
-      }
-      
-      return itemsArray.map(mapCartItem);
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch cart');
-    }
-  }
+// fetch cart
+export const fetchCart = createAsyncThunk(
+  "cart/fetchCart",
+  async (customerId: number) => {
+    const response = await api.get(`/cart.php?customer_id=${customerId}`);
+    return response.data || [];
+  },
 );
 
-// POST /cart.php
-export const addToCart = createAsyncThunk<CartItem, Omit<CartItem, 'cart_id'>>(
-  'cart/addToCart',
-  async (itemData, { rejectWithValue }) => {
-    try {
-      const response = await api.post('/cart.php', itemData);
-      toast.success('Item added to cart!');
-      const responseData = response.data;
-      if (responseData && typeof responseData === 'object' && 'product_id' in responseData) {
-        return mapCartItem(responseData);
-      }
-      return mapCartItem(itemData);
-    } catch (error: any) {
-      toast.error('Failed to add item to cart.');
-      return rejectWithValue(error.response?.data?.message || 'Failed to add item to cart');
-    }
-  }
+// add
+export const addToCart = createAsyncThunk(
+  "cart/addToCart",
+  async (payload: any, { dispatch }) => {
+    await api.post("/cart.php", payload);
+    toast.success("Item added to cart!");
+    dispatch(fetchCart(payload.customer_id));
+    return payload;
+  },
 );
 
-// PUT /cart.php (Update Quantity)
-export const updateCartQuantity = createAsyncThunk<
-  any,
-  { cart_id?: string | number; product_id: string | number; quantity: number },
-  { rejectValue: CartItem }
->(
-  'cart/updateCartQuantity',
-  async (arg, { rejectWithValue, getState }) => {
-    const state = getState() as { cart: CartState };
-    const originalItem = state.cart.items.find(
-      i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
-    );
-
-    try {
-      const response = await api.put('/cart.php', arg);
-      return response.data;
-    } catch (error: any) {
-      toast.error('Failed to update quantity.');
-      return rejectWithValue(originalItem as CartItem);
-    }
-  }
+// update
+export const updateCartQuantity = createAsyncThunk(
+  "cart/updateCartQuantity",
+  async (payload: any, { dispatch }) => {
+    await api.put("/cart.php", payload);
+    dispatch(fetchCart(1));
+    return payload;
+  },
 );
 
-// DELETE /cart.php (Remove Item)
-export const removeFromCart = createAsyncThunk<
-  any,
-  { cart_id?: string | number; product_id: string | number },
-  { rejectValue: CartItem }
->(
-  'cart/removeFromCart',
-  async (arg, { rejectWithValue, getState }) => {
-    const state = getState() as { cart: CartState };
-    const originalItem = state.cart.items.find(
-      i => (arg.cart_id && i.cart_id === arg.cart_id) || i.product_id === arg.product_id
-    );
-
-    try {
-      await api.delete('/cart.php', { data: arg });
-      toast.success('Item removed from cart.');
-      return arg;
-    } catch (error: any) {
-      toast.error('Failed to remove item.');
-      return rejectWithValue(originalItem as CartItem);
-    }
-  }
+// delete
+export const removeFromCart = createAsyncThunk(
+  "cart/removeFromCart",
+  async (payload: any, { dispatch }) => {
+    await api.delete("/cart.php", { data: payload });
+    toast.success("Item removed");
+    dispatch(fetchCart(1));
+    return payload.cart_id;
+  },
 );
-
-// --- Slice ---
 
 const cartSlice = createSlice({
-  name: 'cart',
-  initialState,
+  name: "cart",
+  initialState: {
+    items: [] as any[],
+    summary: {
+      subtotal: 0,
+      shipping: 0,
+      grand_total: 0,
+    },
+    isLoading: false,
+  },
   reducers: {
     clearCart: (state) => {
       state.items = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
-      // fetchCart
+      // fetch all cart
       .addCase(fetchCart.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
-      .addCase(fetchCart.fulfilled, (state, action: PayloadAction<CartItem[]>) => {
+      .addCase(fetchCart.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.items = action.payload;
+        state.items = action.payload?.items || [];
+        state.summary = action.payload?.summary || {
+          subtotal: 0,
+          shipping: 0,
+          grand_total: 0,
+        };
       })
-      .addCase(fetchCart.rejected, (state, action) => {
+      .addCase(fetchCart.rejected, (state) => {
         state.isLoading = false;
-        state.error = action.payload as string;
       })
-      // addToCart
+
+      // add new item
       .addCase(addToCart.pending, (state) => {
         state.isLoading = true;
-        state.error = null;
       })
-      .addCase(addToCart.fulfilled, (state, action: PayloadAction<CartItem>) => {
+      .addCase(addToCart.fulfilled, (state) => {
         state.isLoading = false;
-        state.items.push(action.payload);
       })
-      .addCase(addToCart.rejected, (state, action) => {
+      .addCase(addToCart.rejected, (state) => {
         state.isLoading = false;
-        state.error = action.payload as string;
       })
-      
-      // OPTIMISTIC UPDATE: updateCartQuantity
-      .addCase(updateCartQuantity.pending, (state, action) => {
-        const { cart_id, product_id, quantity } = action.meta.arg;
-        const item = state.items.find(
-          i => (cart_id && i.cart_id === cart_id) || i.product_id === product_id
-        );
-        if (item) {
-          item.quantity = quantity; // Optimistically update
-        }
+
+      // update quantity
+      .addCase(updateCartQuantity.pending, (state) => {
+        state.isLoading = true;
       })
-      .addCase(updateCartQuantity.rejected, (state, action) => {
-        if (action.payload) {
-          const originalItem = action.payload;
-          const item = state.items.find(
-            i => (originalItem.cart_id && i.cart_id === originalItem.cart_id) || i.product_id === originalItem.product_id
-          );
-          if (item) {
-            item.quantity = originalItem.quantity;
-          }
-        }
+      .addCase(updateCartQuantity.fulfilled, (state) => {
+        state.isLoading = false;
       })
-      
-      // OPTIMISTIC UPDATE: removeFromCart
-      .addCase(removeFromCart.pending, (state, action) => {
-        const { cart_id, product_id } = action.meta.arg;
-        state.items = state.items.filter(
-          i => !((cart_id && i.cart_id === cart_id) || i.product_id === product_id)
-        );
+      .addCase(updateCartQuantity.rejected, (state) => {
+        state.isLoading = false;
       })
-      .addCase(removeFromCart.rejected, (state, action) => {
-        if (action.payload) {
-          state.items.push(action.payload);
-        }
+
+      //  remove item
+      .addCase(removeFromCart.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeFromCart.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(removeFromCart.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const BASE_URL = "https://floraapi-production-e891.up.railway.app/api";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -16,9 +16,12 @@ api.interceptors.response.use(
   },
   (error) => {
     // Basic global error logging
-    const message = error.response?.data?.message || error.message || "An unexpected error occurred";
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "An unexpected error occurred";
     console.error("[Axios API Error]:", message);
-    
+
     return Promise.reject(error);
-  }
+  },
 );

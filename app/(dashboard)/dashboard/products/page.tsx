@@ -1,7 +1,6 @@
 "use client";
 
 import { Edit, Trash2 } from "lucide-react";
-import { products as initialProducts } from "@/data/products";
 import { useState } from "react";
 
 import DeleteModal from "@/components/DeleteModal";
@@ -10,7 +9,7 @@ import AddProductModal from "@/components/AddProductModal";
 
 export default function ProductsPage() {
   // products state
-  const [productList, setProductList] = useState(initialProducts);
+  const [productList, setProductList] = useState([]);
 
   // delete state
   const [open, setOpen] = useState(false);
@@ -48,7 +47,9 @@ export default function ProductsPage() {
   //  save edited product
   const handleSave = (updated: any) => {
     setProductList((prev) =>
-      prev.map((p) => (p.product_id === updated.product_id ? { ...p, ...updated } : p)),
+      prev.map((p) =>
+        p.product_id === updated.product_id ? { ...p, ...updated } : p,
+      ),
     );
   };
 

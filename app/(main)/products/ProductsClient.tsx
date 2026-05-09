@@ -12,10 +12,18 @@ export default function ProductsClient({
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL FLOWERS");
 
+  const categories = [
+    "ALL FLOWERS",
+    "WEDDING",
+    "ROMANTIC",
+    "SEASONAL",
+    "WILDFLOWER",
+  ];
+
   const filteredProducts = initialProducts.filter((p) => {
     const matchCategory =
       selectedCategory === "ALL FLOWERS" ||
-      p.category_name?.toUpperCase() === selectedCategory;
+      p.category_name?.toUpperCase() === selectedCategory.toUpperCase();
 
     const matchSearch = p.product_name
       ?.toLowerCase()
@@ -40,21 +48,19 @@ export default function ProductsClient({
 
         {/* Categories Tabs */}
         <div className="flex flex-wrap justify-center items-center gap-6 md:gap-12 mb-8 border-b border-transparent">
-          {["ALL FLOWERS", "MONO-BOUQUETS", "BRIDAL BOUQUETS", "SEASONAL"].map(
-            (cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`text-xs md:text-sm tracking-widest uppercase pb-2 transition-all duration-300 border-b-2 cursor-pointer ${
-                  selectedCategory === cat
-                    ? "border-flora-green text-gray-800 font-medium"
-                    : "border-transparent text-gray-500 hover:text-gray-800"
-                }`}
-              >
-                {cat}
-              </button>
-            ),
-          )}
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`text-xs md:text-sm tracking-widest uppercase pb-2 transition-all duration-300 border-b-2 cursor-pointer ${
+                selectedCategory === cat
+                  ? "border-flora-green text-gray-800 font-medium"
+                  : "border-transparent text-gray-500 hover:text-gray-800"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Search Bar */}

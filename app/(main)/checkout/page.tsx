@@ -7,7 +7,7 @@ import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckoutFormSchema, CheckoutFormValues } from "@/schemas/api.schema";
+import { CheckoutFormSchema, CheckoutFormValues } from "@/schema/api.schema";
 import { api } from "@/lib/axios";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const { items: cart } = useSelector((state: AppState) => state.cart);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  
+
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,26 +71,38 @@ export default function CheckoutPage() {
         <div className="flex-1">
           <h1 className="text-4xl font-semibold mb-8">Payment Details</h1>
 
-          <form id="checkout-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form
+            id="checkout-form"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+          >
             {/* First Name & Last Name */}
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-sm mb-1">First Name</label>
                 <input
                   {...register("firstName")}
-                  className={`border p-2 w-full rounded ${errors.firstName ? 'border-red-500' : ''}`}
+                  className={`border p-2 w-full rounded ${errors.firstName ? "border-red-500" : ""}`}
                   placeholder="Florence"
                 />
-                {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.firstName.message}
+                  </p>
+                )}
               </div>
               <div className="flex-1">
                 <label className="block text-sm mb-1">Last Name</label>
                 <input
                   {...register("lastName")}
-                  className={`border p-2 w-full rounded ${errors.lastName ? 'border-red-500' : ''}`}
+                  className={`border p-2 w-full rounded ${errors.lastName ? "border-red-500" : ""}`}
                   placeholder="Nightingale"
                 />
-                {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>}
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.lastName.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -99,10 +111,14 @@ export default function CheckoutPage() {
               <label className="block text-sm mb-1">Email</label>
               <input
                 {...register("email")}
-                className={`border p-2 w-full rounded ${errors.email ? 'border-red-500' : ''}`}
+                className={`border p-2 w-full rounded ${errors.email ? "border-red-500" : ""}`}
                 placeholder="example@example.com"
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Phone */}
@@ -110,10 +126,14 @@ export default function CheckoutPage() {
               <label className="block text-sm mb-1">Phone</label>
               <input
                 {...register("phone")}
-                className={`border p-2 w-full rounded ${errors.phone ? 'border-red-500' : ''}`}
+                className={`border p-2 w-full rounded ${errors.phone ? "border-red-500" : ""}`}
                 placeholder="+1 234 567 8900"
               />
-              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+              {errors.phone && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.phone.message}
+                </p>
+              )}
             </div>
 
             {/* Address */}
@@ -121,10 +141,14 @@ export default function CheckoutPage() {
               <label className="block text-sm mb-1">Address</label>
               <input
                 {...register("address")}
-                className={`border p-2 w-full rounded ${errors.address ? 'border-red-500' : ''}`}
+                className={`border p-2 w-full rounded ${errors.address ? "border-red-500" : ""}`}
                 placeholder="123 Main St"
               />
-              {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
+              {errors.address && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.address.message}
+                </p>
+              )}
             </div>
 
             {/* City & Zip Code */}
@@ -133,32 +157,46 @@ export default function CheckoutPage() {
                 <label className="block text-sm mb-1">City</label>
                 <input
                   {...register("city")}
-                  className={`border p-2 w-full rounded ${errors.city ? 'border-red-500' : ''}`}
+                  className={`border p-2 w-full rounded ${errors.city ? "border-red-500" : ""}`}
                   placeholder="New York"
                 />
-                {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
+                {errors.city && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.city.message}
+                  </p>
+                )}
               </div>
               <div className="flex-1">
                 <label className="block text-sm mb-1">Zip Code</label>
                 <input
                   {...register("zipCode")}
-                  className={`border p-2 w-full rounded ${errors.zipCode ? 'border-red-500' : ''}`}
+                  className={`border p-2 w-full rounded ${errors.zipCode ? "border-red-500" : ""}`}
                   placeholder="10001"
                 />
-                {errors.zipCode && <p className="text-red-500 text-xs mt-1">{errors.zipCode.message}</p>}
+                {errors.zipCode && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.zipCode.message}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Notes */}
             <div>
-              <label className="block text-sm mb-1">Order Notes (Optional)</label>
+              <label className="block text-sm mb-1">
+                Order Notes (Optional)
+              </label>
               <textarea
                 {...register("notes")}
                 className="border p-2 w-full rounded"
                 placeholder="Any special instructions?"
                 rows={3}
               />
-              {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes.message}</p>}
+              {errors.notes && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.notes.message}
+                </p>
+              )}
             </div>
           </form>
         </div>
@@ -234,10 +272,13 @@ export default function CheckoutPage() {
             </button>
           </div>
         </div>
-        <OrderSuccessModal open={open} onClose={() => {
-          setOpen(false);
-          router.push("/");
-        }} />
+        <OrderSuccessModal
+          open={open}
+          onClose={() => {
+            setOpen(false);
+            router.push("/");
+          }}
+        />
       </div>
     </main>
   );
