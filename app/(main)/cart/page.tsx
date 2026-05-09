@@ -1,15 +1,11 @@
 "use client";
-import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import {
-  fetchCart,
-  updateCartQuantity,
-  removeFromCart,
-} from "@/store/cartSlice";
+import { updateCartQuantity, removeFromCart } from "@/store/cartSlice";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import Link from "next/link";
 
 export default function Cart() {
   const router = useRouter();
@@ -20,10 +16,6 @@ export default function Cart() {
     summary,
     isLoading,
   } = useSelector((state: RootState) => state.cart);
-
-  useEffect(() => {
-    dispatch(fetchCart(1));
-  }, [dispatch]);
 
   function handleIncrease(item: any) {
     dispatch(
@@ -80,9 +72,15 @@ export default function Cart() {
 
             {/* Empty State */}
             {cart.length === 0 && (
-              <p className="py-12 text-center text-gray-500 italic">
-                Your cart is currently empty.
-              </p>
+              <div className="py-12 text-center  italic">
+                <p className="text-gray-500 ">Your cart is currently empty.</p>
+                <Link
+                  href="products"
+                  className="underline text-green-800 font-semibold"
+                >
+                  Continue to products
+                </Link>
+              </div>
             )}
 
             {/* Items */}
@@ -142,48 +140,50 @@ export default function Cart() {
           </div>
 
           {/* RIGHT - Summary */}
-          <div className="w-full lg:w-72 shrink-0">
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#e8e3da] sticky top-8">
-              <div className="flex justify-between text-sm text-[#666] mb-3">
-                <span>Subtotal</span>
-                <span>{formatCurrency(summary.subtotal)}</span>
+          {cart.length > 0 && (
+            <div className="w-full lg:w-72 shrink-0">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#e8e3da] sticky top-8">
+                <div className="flex justify-between text-sm text-[#666] mb-3">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(summary.subtotal)}</span>
+                </div>
+
+                <div className="flex justify-between text-sm text-[#666] pb-4 border-b border-[#eee]">
+                  <span>Shipping</span>
+                  <span className="text-[#2d5a3d] font-medium">
+                    {formatCurrency(summary.shipping)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center mt-4 mb-6">
+                  <span className="text-lg font-semibold text-[#1a1a1a]">
+                    Total
+                  </span>
+                  <span className="text-2xl font-semibold text-[#1a1a1a]">
+                    {formatCurrency(summary.grand_total)}
+                  </span>
+                </div>
+
+                <button
+                  disabled={isLoading || cart.length === 0}
+                  onClick={() => {
+                    if (cart.length === 0) {
+                      alert("Cart is empty!");
+                      return;
+                    }
+                    router.push("/checkout");
+                  }}
+                  className="w-full bg-[#2d5a3d] cursor-pointer text-white text-sm font-medium py-3.5 rounded-xl hover:bg-[#1e3d29] transition shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  Proceed to Checkout
+                </button>
+
+                <p className="flex items-center justify-center gap-1.5 text-[10px] text-[#aaa] mt-4 tracking-widest uppercase font-bold">
+                  🔒 Secure Payment Processing
+                </p>
               </div>
-
-              <div className="flex justify-between text-sm text-[#666] pb-4 border-b border-[#eee]">
-                <span>Shipping</span>
-                <span className="text-[#2d5a3d] font-medium">
-                  {formatCurrency(summary.shipping)}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center mt-4 mb-6">
-                <span className="text-lg font-semibold text-[#1a1a1a]">
-                  Total
-                </span>
-                <span className="text-2xl font-semibold text-[#1a1a1a]">
-                  {formatCurrency(summary.grand_total)}
-                </span>
-              </div>
-
-              <button
-                disabled={isLoading}
-                onClick={() => {
-                  if (cart.length === 0) {
-                    alert("Cart is empty!");
-                    return;
-                  }
-                  router.push("/checkout");
-                }}
-                className="w-full bg-[#2d5a3d] text-white text-sm font-medium py-3.5 rounded-xl hover:bg-[#1e3d29] transition shadow-md"
-              >
-                Proceed to Checkout
-              </button>
-
-              <p className="flex items-center justify-center gap-1.5 text-[10px] text-[#aaa] mt-4 tracking-widest uppercase font-bold">
-                🔒 Secure Payment Processing
-              </p>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </>

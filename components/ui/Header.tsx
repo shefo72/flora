@@ -6,6 +6,11 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { fetchCart } from "@/store/cartSlice";
+import { AppDispatch } from "@/store/store";
+
 import navLogo from "../../public/navLogo.avif";
 import { rasa } from "@/lib/fonts";
 
@@ -13,11 +18,18 @@ export default function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const dispatch = useDispatch<AppDispatch>();
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
     { name: "Dashboard", path: "/dashboard" },
   ];
+
+  // fetch cart
+  useEffect(() => {
+    dispatch(fetchCart(1));
+  }, [dispatch]);
 
   return (
     <nav className="relative flex items-center justify-between px-4 md:px-8 py-2 bg-[#F7F7EF]">

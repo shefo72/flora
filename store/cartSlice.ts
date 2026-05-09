@@ -54,11 +54,7 @@ const cartSlice = createSlice({
     },
     isLoading: false,
   },
-  reducers: {
-    clearCart: (state) => {
-      state.items = [];
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       // fetch all cart
@@ -113,5 +109,4 @@ const cartSlice = createSlice({
   },
 });
 
-export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

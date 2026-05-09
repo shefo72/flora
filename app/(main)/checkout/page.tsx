@@ -1,67 +1,70 @@
 "use client";
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { AppState, AppDispatch } from "@/store/store";
-import { clearCart } from "@/store/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/store/store";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
-import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckoutFormSchema, CheckoutFormValues } from "@/schema/api.schema";
-import { api } from "@/lib/axios";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/utils";
+import { processCheckout } from "@/server/checkout.server";
+import { fetchCart } from "@/store/cartSlice";
 
 export default function CheckoutPage() {
-  const { items: cart } = useSelector((state: AppState) => state.cart);
-  const dispatch = useDispatch<AppDispatch>();
+  const {
+    items: cart,
+    summary,
+    isLoading,
+  } = useSelector((state: RootState) => state.cart);
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const subtotal = cart.reduce(
-    (sum, item) => sum + (Number(item.price) || 0) * item.quantity,
-    0,
-  );
-
-  const shipping = 0;
-  const tax = subtotal * 0.3;
-  const total = subtotal + tax + shipping;
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CheckoutFormValues>({
-    resolver: zodResolver(CheckoutFormSchema),
-  });
+  } = useForm();
 
-  const onSubmit = async (data: CheckoutFormValues) => {
+  const onSubmit = async (data: any) => {
     if (cart.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
 
     setIsSubmitting(true);
-    try {
-      // POST to /checkout.php using Axios
-      await api.post("/checkout.php", {
-        ...data,
-        cartItems: cart,
-        total: total,
-      });
 
-      // On success: clear Redux cart, show success Toast
-      dispatch(clearCart());
-      toast.success("Order placed successfully 🎉");
-      setOpen(true); // show modal
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to place order. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    const payload = {
+      customer_id: 1,
+      shipping: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        street_address: data.address,
+        city: data.city,
+        state: data.state || "NY",
+        zip: data.zipCode,
+        shipping_method: "Standard local delivery",
+      },
+      payment: {
+        card_number: data.cardNumber,
+        expiration_date: data.expiryDate,
+        cvv: data.cvv,
+      },
+    };
+
+    const result = await processCheckout(payload);
+
+    if (result.success) {
+      dispatch(fetchCart(1));
+      toast.success("Order placed successfully");
+      setOpen(true);
+    } else {
+      toast.error(result.message);
     }
+
+    setIsSubmitting(false);
   };
 
   return (
@@ -69,209 +72,194 @@ export default function CheckoutPage() {
       <div className="flex flex-col lg:flex-row gap-10">
         {/* LEFT - FORM */}
         <div className="flex-1">
-          <h1 className="text-4xl font-semibold mb-8">Payment Details</h1>
+          <h1 className="text-4xl font-semibold mb-8">Checkout Details</h1>
 
           <form
             id="checkout-form"
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-5"
+            className="space-y-6"
           >
-            {/* First Name & Last Name */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm mb-1">First Name</label>
-                <input
-                  {...register("firstName")}
-                  className={`border p-2 w-full rounded ${errors.firstName ? "border-red-500" : ""}`}
-                  placeholder="Florence"
-                />
-                {errors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.firstName.message}
-                  </p>
-                )}
+            {/* --- Shipping Section --- */}
+            <div className="bg-white p-6 border rounded-xl shadow-sm space-y-4">
+              <h2 className="text-lg font-medium border-b pb-2">
+                Shipping Address
+              </h2>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">First Name</label>
+                  <input
+                    required
+                    {...register("firstName")}
+                    className="border p-2 w-full rounded"
+                    placeholder="Florence"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">Last Name</label>
+                  <input
+                    required
+                    {...register("lastName")}
+                    className="border p-2 w-full rounded"
+                    placeholder="Nightingale"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="block text-sm mb-1">Last Name</label>
+
+              <div>
+                <label className="block text-sm mb-1">Street Address</label>
                 <input
-                  {...register("lastName")}
-                  className={`border p-2 w-full rounded ${errors.lastName ? "border-red-500" : ""}`}
-                  placeholder="Nightingale"
+                  required
+                  {...register("address")}
+                  className="border p-2 w-full rounded"
+                  placeholder="123 Main St"
                 />
-                {errors.lastName && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.lastName.message}
-                  </p>
-                )}
               </div>
-            </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm mb-1">Email</label>
-              <input
-                {...register("email")}
-                className={`border p-2 w-full rounded ${errors.email ? "border-red-500" : ""}`}
-                placeholder="example@example.com"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm mb-1">Phone</label>
-              <input
-                {...register("phone")}
-                className={`border p-2 w-full rounded ${errors.phone ? "border-red-500" : ""}`}
-                placeholder="+1 234 567 8900"
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.phone.message}
-                </p>
-              )}
-            </div>
-
-            {/* Address */}
-            <div>
-              <label className="block text-sm mb-1">Address</label>
-              <input
-                {...register("address")}
-                className={`border p-2 w-full rounded ${errors.address ? "border-red-500" : ""}`}
-                placeholder="123 Main St"
-              />
-              {errors.address && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.address.message}
-                </p>
-              )}
-            </div>
-
-            {/* City & Zip Code */}
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm mb-1">City</label>
-                <input
-                  {...register("city")}
-                  className={`border p-2 w-full rounded ${errors.city ? "border-red-500" : ""}`}
-                  placeholder="New York"
-                />
-                {errors.city && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.city.message}
-                  </p>
-                )}
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm mb-1">Zip Code</label>
-                <input
-                  {...register("zipCode")}
-                  className={`border p-2 w-full rounded ${errors.zipCode ? "border-red-500" : ""}`}
-                  placeholder="10001"
-                />
-                {errors.zipCode && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.zipCode.message}
-                  </p>
-                )}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">City</label>
+                  <input
+                    required
+                    {...register("city")}
+                    className="border p-2 w-full rounded"
+                    placeholder="New York"
+                  />
+                </div>
+                <div className="w-1/3">
+                  <label className="block text-sm mb-1">State</label>
+                  <input
+                    required
+                    {...register("state")}
+                    className="border p-2 w-full rounded"
+                    placeholder="NY"
+                    maxLength={10}
+                  />
+                </div>
+                <div className="w-1/3">
+                  <label className="block text-sm mb-1">Zip Code</label>
+                  <input
+                    required
+                    {...register("zipCode")}
+                    className="border p-2 w-full rounded"
+                    placeholder="10001"
+                    maxLength={10}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Notes */}
-            <div>
-              <label className="block text-sm mb-1">
-                Order Notes (Optional)
-              </label>
-              <textarea
-                {...register("notes")}
-                className="border p-2 w-full rounded"
-                placeholder="Any special instructions?"
-                rows={3}
-              />
-              {errors.notes && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.notes.message}
-                </p>
-              )}
+            {/* --- Payment Section --- */}
+            <div className="bg-white p-6 border rounded-xl shadow-sm space-y-4">
+              <h2 className="text-lg font-medium border-b pb-2">
+                Payment Info
+              </h2>
+
+              <div>
+                <label className="block text-sm mb-1">Card Number</label>
+                <input
+                  required
+                  {...register("cardNumber")}
+                  className="border p-2 w-full rounded"
+                  placeholder="1234 5678 1234 5678"
+                  maxLength={16}
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">Expiration Date</label>
+                  <input
+                    {...register("expiryDate", {
+                      required: "Required",
+                      pattern: {
+                        value: /^(0[1-9]|1[0-2])\/?([0-9]{2})$/,
+                        message: "Invalid  Data , Use MM/YY format",
+                      },
+                    })}
+                    className="border p-2 w-full rounded"
+                    placeholder="MM/YY"
+                    maxLength={5}
+                  />
+                  {errors?.expiryDate && (
+                    <span className="text-red-600 text-[12px] font-semibold">
+                      {errors.expiryDate.message as string}
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm mb-1">CVV</label>
+                  <input
+                    required
+                    {...register("cvv")}
+                    type="password"
+                    maxLength={3}
+                    className="border p-2 w-full rounded"
+                    placeholder="123"
+                  />
+                </div>
+              </div>
             </div>
           </form>
         </div>
 
         {/* RIGHT - SUMMARY */}
         <div className="w-full lg:w-80">
-          <div className="bg-[#f0ede6] rounded-2xl p-6">
-            <h2 className="font-semibold mb-5">Order Summary</h2>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <div className="bg-[#f0ede6] rounded-2xl p-6 sticky top-8">
+              <h2 className="font-semibold mb-5">Order Summary</h2>
 
-            {/* Products */}
-            <div className="space-y-4">
-              {cart.map((item) => (
-                <div key={item.product_id} className="flex gap-3">
-                  <Image
-                    src={item.image || "https://placehold.co/100"} // fallback if image is missing
-                    alt={item.name || "Product"}
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 rounded object-cover"
-                  />
-
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.name}</p>
-
-                    <p className="text-xs text-gray-500">x{item.quantity}</p>
-
-                    <p className="text-sm font-semibold">
-                      ${((Number(item.price) || 0) * item.quantity).toFixed(2)}
-                    </p>
+              {/* Products */}
+              <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+                {cart.map((item) => (
+                  <div key={item.cart_id} className="flex gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium line-clamp-1">
+                        {item.product_name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Qty: {item.quantity}
+                      </p>
+                      <p className="text-sm font-semibold">
+                        {formatCurrency(item.line_total)}
+                      </p>
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              <div className="mt-6 space-y-2 text-sm border-t border-[#ddd] pt-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(summary.subtotal)}</span>
                 </div>
-              ))}
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="text-green-700 font-medium">
+                    {formatCurrency(summary.shipping)}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t border-[#ddd]">
+                  <span>Total</span>
+                  <span>{formatCurrency(summary.grand_total)}</span>
+                </div>
+              </div>
+
+              {/* Button */}
+              <button
+                type="submit"
+                form="checkout-form"
+                disabled={isSubmitting || cart.length === 0}
+                className="mt-6 w-full bg-[#2d5a3d] cursor-pointer text-white py-3.5 rounded-xl disabled:opacity-50 hover:bg-[#1e3d29] transition flex justify-center items-center gap-2 font-medium"
+              >
+                {isSubmitting ? "Processing..." : `Place Order`}
+              </button>
             </div>
-
-            {/* Totals */}
-            <div className="mt-6 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span className="text-green-600">Free</span>
-              </div>
-
-              <div className="flex justify-between border-b pb-2">
-                <span>Tax</span>
-                <span>${tax.toFixed(2)}</span>
-              </div>
-
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              form="checkout-form"
-              disabled={isSubmitting || cart.length === 0}
-              className="mt-5 w-full bg-flora-green text-white py-3 rounded-xl disabled:opacity-50 flex justify-center items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5" />
-                  Processing...
-                </>
-              ) : (
-                `Place Order ($${total.toFixed(2)})`
-              )}
-            </button>
-          </div>
+          )}
         </div>
+
         <OrderSuccessModal
           open={open}
           onClose={() => {
