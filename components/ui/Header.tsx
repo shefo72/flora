@@ -1,35 +1,53 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { ShoppingCart, User, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ShoppingCart, User, Menu, X, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchCart } from "@/store/cartSlice";
-import { AppDispatch } from "@/store/store";
+import { logout } from "@/store/authSlice";
+import { AppDispatch, RootState } from "@/store/store";
 
 import navLogo from "../../public/navLogo.avif";
 import { rasa } from "@/lib/fonts";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
+  const itemsNumber = useSelector(
+    (state: RootState) => state.cart.items.length,
+  );
+
+  const { isAuthenticated, userInfo } = useSelector(
+    (state: RootState) => state.auth,
+  );
 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
-    { name: "Dashboard", path: "/dashboard" },
+    ...(isAuthenticated ? [{ name: "Cart", path: "/cart" }] : []),
+    ...(isAuthenticated && userInfo?.role === "admin"
+      ? [{ name: "Dashboard", path: "/dashboard" }]
+      : []),
   ];
 
-  // fetch cart
   useEffect(() => {
-    dispatch(fetchCart(1));
-  }, [dispatch]);
+    if (isAuthenticated && userInfo?.customer_id) {
+      dispatch(fetchCart(Number(userInfo.customer_id)));
+    }
+  }, [dispatch, isAuthenticated, userInfo?.customer_id]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setIsMobileMenuOpen(false);
+    router.push("/login");
+  };
 
   return (
     <nav className="relative flex items-center justify-between px-4 md:px-8 py-2 bg-[#F7F7EF]">
@@ -62,7 +80,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center gap-5 md:gap-4 z-10">
-        <Link href="/cart">
+        <Link href="/cart" className="relative">
           <ShoppingCart
             className={`w-6 h-6 cursor-pointer transition-colors ${
               pathname === "/cart"
@@ -70,10 +88,29 @@ export default function Navbar() {
                 : "text-gray-500 hover:text-floragreen"
             }`}
           />
+          {itemsNumber > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-green-700 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+              {itemsNumber}
+            </span>
+          )}
         </Link>
 
-        <div className="hidden md:block">
-          <User className="w-6 h-6 cursor-pointer text-gray-500 hover:text-floragreen transition-colors" />
+        <div className="hidden md:flex items-center gap-4">
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleLogout}
+                className="text-red-800 hover:text-red-900 transition-colors cursor-pointer"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <Link href="/login">
+              <User className="w-6 h-6 cursor-pointer text-gray-500 hover:text-floragreen transition-colors" />
+            </Link>
+          )}
         </div>
 
         <button
@@ -120,9 +157,13 @@ export default function Navbar() {
               <User size={20} />
             </div>
             <div>
-              <p className="text-sm font-bold text-floragreen">Account</p>
+              <p className="text-sm font-bold text-floragreen capitalize">
+                {isAuthenticated
+                  ? `${userInfo?.first_name} ${userInfo?.last_name}`
+                  : "Guest"}
+              </p>
               <p className="text-[10px] text-gray-500 uppercase tracking-widest">
-                Welcome
+                {isAuthenticated ? "Welcome Back" : "Welcome"}
               </p>
             </div>
           </div>
@@ -148,6 +189,27 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            <div className="mt-auto border-t border-gray-200 pt-6">
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 text-red-500 font-medium text-lg hover:text-red-700 transition-colors w-full"
+                >
+                  <LogOut size={22} />
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 text-floragreen font-medium text-lg hover:text-green-800 transition-colors w-full"
+                >
+                  <User size={22} />
+                  Login / Sign Up
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

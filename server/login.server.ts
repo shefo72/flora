@@ -2,6 +2,7 @@
 
 import { LoginFormValues, loginSchema } from "../schema/login.schema";
 import axios, { AxiosRequestConfig, isAxiosError } from "axios";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default async function loginAction(values: LoginFormValues) {
   const validationResult = loginSchema.safeParse(values);
@@ -31,7 +32,7 @@ export default async function loginAction(values: LoginFormValues) {
     console.log("Sending:", requestData);
 
     const options: AxiosRequestConfig = {
-      url: "https://velvetbrewapi-production.up.railway.app/api/login.php",
+      url: `${API_BASE_URL}/login.php`,
       method: "POST",
       data: requestData,
       headers: {

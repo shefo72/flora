@@ -43,10 +43,15 @@ export default function Login() {
       console.log("Full response:", response);
 
       if (response.success) {
+        const userData = {
+          ...response.data.user,
+          role: response.data.role,
+        };
+
         dispatch(
           setAuthInfo({
             isAuthenticated: true,
-            userInfo: response.data.user,
+            userInfo: userData,
           }),
         );
 
