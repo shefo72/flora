@@ -27,7 +27,7 @@ export const updateCartQuantity = createAsyncThunk(
   "cart/updateCartQuantity",
   async (payload: any, { dispatch }) => {
     await api.put("/cart.php", payload);
-    dispatch(fetchCart(1));
+    dispatch(fetchCart(payload.customer_id));
     return payload;
   },
 );
@@ -38,7 +38,7 @@ export const removeFromCart = createAsyncThunk(
   async (payload: any, { dispatch }) => {
     await api.delete("/cart.php", { data: payload });
     toast.success("Item removed");
-    dispatch(fetchCart(1));
+    dispatch(fetchCart(payload.customer_id));
     return payload.cart_id;
   },
 );

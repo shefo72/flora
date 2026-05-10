@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import Head from "next/head";
+import { useEffect } from "react";
 import Image from "next/image";
 import signupImage from "../../../public/assets/images/signImage.webp";
 import Link from "next/link";
@@ -20,6 +19,10 @@ import { BrandButton } from "@/components/ui/BrandButton";
 export default function Login() {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    document.title = "Sign In - Petal & Bloom";
+  }, []);
 
   const {
     register,
@@ -78,10 +81,6 @@ export default function Login() {
 
   return (
     <>
-      <Head>
-        <title>Sign In - Petal & Bloom</title>
-      </Head>
-
       <div className="relative flex min-h-screen w-full items-center justify-center bg-[#4A5D4A]">
         <div className="absolute inset-0">
           <Image

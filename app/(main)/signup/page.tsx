@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import Head from "next/head";
+import { useEffect } from "react";
 import Image from "next/image";
 import signupImage from "../../../public/assets/images/signImage.webp";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -16,6 +15,10 @@ import { BrandButton } from "@/components/ui/BrandButton";
 
 export default function SignUp() {
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Create Account - Botanical Sanctuary";
+  }, []);
 
   const {
     register,
@@ -65,10 +68,6 @@ export default function SignUp() {
 
   return (
     <>
-      <Head>
-        <title>Create Account - Botanical Sanctuary</title>
-      </Head>
-
       <div className="flex h-screen w-full overflow-hidden bg-[#F9F7F2]">
         <div className="flex h-full w-full flex-col md:w-1/2">
           <div className="flex h-full flex-col justify-center px-8 md:px-16 lg:px-24">

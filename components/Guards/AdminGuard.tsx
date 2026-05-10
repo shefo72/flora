@@ -10,34 +10,33 @@ export default function AdminGuard({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-
   const [isReady, setIsReady] = useState(false);
-
   const { isAuthenticated, userInfo } = useSelector(
     (state: RootState) => state.auth,
   );
 
   useEffect(() => {
     const checkAuth = () => {
-      if (isAuthenticated !== undefined) {
+      const savedAuth = localStorage.getItem("authInfo");
+      const parsedAuth = savedAuth ? JSON.parse(savedAuth) : null;
+
+      const auth = isAuthenticated || parsedAuth?.isAuthenticated;
+      const role = userInfo?.role || parsedAuth?.userInfo?.role;
+
+      if (!auth) {
+        router.replace("/login");
+      } else if (role !== "admin") {
+        router.replace("/");
+      } else {
         setIsReady(true);
       }
     };
 
-    checkAuth();
-  }, [isAuthenticated]);
+    const timer = setTimeout(checkAuth, 50);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, userInfo, router]);
 
-  useEffect(() => {
-    if (isReady) {
-      if (!isAuthenticated) {
-        router.replace("/login");
-      } else if (userInfo?.role !== "admin") {
-        router.replace("/");
-      }
-    }
-  }, [isReady, isAuthenticated, userInfo, router]);
-
-  if (!isReady || (isAuthenticated && userInfo?.role !== "admin")) {
+  if (!isReady) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-white z-9999">
         <div className="w-10 h-10 border-4 border-[#2d5a3d] border-t-transparent rounded-full animate-spin"></div>
