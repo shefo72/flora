@@ -108,9 +108,9 @@ export default function OrdersPage() {
                         : "opacity-100"
                     } ${getStatusStyle(order.status)}`}
                   >
-                    <option value="Processing">Processing</option>
-                    <option value="Out for Delivery">Out for delivery</option>
-                    <option value="Delivered">Delivered</option>
+                    <option value="processing">Processing</option>
+                    <option value="out for delivery">Out for delivery</option>
+                    <option value="delivered">Delivered</option>
                   </select>
 
                   {updatingId === order.raw_order_id && (

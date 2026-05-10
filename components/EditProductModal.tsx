@@ -40,6 +40,10 @@ export default function EditProductModal({
   const [form, setForm] = useState<Product | null>(product);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setForm(product);
+  }, [product]);
+
   if (!form) return null;
 
   const handleChange = (key: keyof Product, value: any) => {

@@ -47,6 +47,7 @@ export default function Navbar() {
     dispatch(logout());
     setIsMobileMenuOpen(false);
     router.push("/login");
+    router.refresh();
   };
 
   return (

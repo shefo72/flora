@@ -18,6 +18,7 @@ export default function CheckoutPage() {
     summary,
     isLoading,
   } = useSelector((state: RootState) => state.cart);
+  const { userInfo } = useSelector((state: RootState) => state.auth);
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -39,7 +40,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     const payload = {
-      customer_id: 1,
+      customer_id: Number(userInfo?.customer_id),
       shipping: {
         first_name: data.firstName,
         last_name: data.lastName,
@@ -59,7 +60,7 @@ export default function CheckoutPage() {
     const result = await processCheckout(payload);
 
     if (result.success) {
-      dispatch(fetchCart(1));
+      dispatch(fetchCart(Number(userInfo?.customer_id)));
       toast.success("Order placed successfully");
       setOpen(true);
     } else {
