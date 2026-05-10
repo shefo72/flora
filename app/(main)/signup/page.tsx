@@ -40,7 +40,6 @@ export default function SignUp() {
   const onSubmit: SubmitHandler<SignupFormValues> = async (values) => {
     try {
       const response = await signupAction(values);
-      console.log({ response });
 
       if (response.success) {
         toast.success(response.message);

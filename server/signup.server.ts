@@ -34,8 +34,6 @@ export default async function signupAction(values: SignupFormValues) {
       },
     });
 
-    console.log("API response:", data);
-
     if (
       data.success === true ||
       data.status === "success" ||

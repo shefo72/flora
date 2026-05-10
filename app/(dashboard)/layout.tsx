@@ -2,6 +2,7 @@ import React from "react";
 import DashboardSidebar from "../../components/admin/DashboardSidebar";
 import AdminGuard from "@/components/Guards/AdminGuard";
 import Providers from "../../components/providers/providers";
+import { ToastContainer, Bounce } from "react-toastify";
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,20 @@ export default function DashboardLayout({
             <main className="flex-1 p-4 sm:p-6 md:p-8">{children}</main>
           </div>
         </div>
+
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
       </AdminGuard>
     </Providers>
   );

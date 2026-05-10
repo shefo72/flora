@@ -9,13 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { addProduct } from "@/server/dashboard.server";
 import Image from "next/image";
+import { uploadImage } from "./../lib/uploadImage";
 
 type Product = {
-  product_id: number;
   product_name: string;
-  category_name: string;
-  base_price: number;
+  category_id: number;
+  price: number;
   stock: number;
   status: string;
   description: string;
@@ -29,42 +31,69 @@ type Props = {
 };
 
 export default function AddProductModal({ open, onClose, onAdd }: Props) {
-  const [form, setForm] = useState<Product>({
-    product_id: Date.now(),
+  const initialForm: Product = {
     product_name: "",
-    category_name: "Romantic",
-    base_price: 0,
+    category_id: 1,
+    price: 0,
     stock: 0,
     status: "in stock",
     description: "",
     image: "",
-  });
+  };
+
+  const [form, setForm] = useState<Product>(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleChange = (key: keyof Product, value: any) => {
     setForm({ ...form, [key]: value });
   };
 
-  const handleSubmit = () => {
-    onAdd(form);
+  const handleSubmit = async () => {
+    setLoading(true);
 
-    // reset form
-    setForm({
-      product_id: Date.now(),
-      product_name: "",
-      category_name: "Romantic",
-      base_price: 0,
-      stock: 0,
-      status: "in stock",
-      description: "",
-      image: "",
-    });
+    try {
+      if (!imageFile) {
+        toast.error("Please select an image");
+        setLoading(false);
+        return;
+      }
 
-    onClose();
+      const imageUrl = await uploadImage(imageFile);
+
+      const payload = {
+        product_name: form.product_name,
+        category_id: form.category_id,
+        collections: "Quiet Elegance",
+        price: form.price.toString(),
+        stock: form.stock,
+        status: form.status,
+        description: form.description,
+        image_url: imageUrl,
+      };
+
+      const result = await addProduct(payload);
+
+      if (result.success) {
+        toast.success("Product added successfully!");
+        setForm(initialForm);
+        setImageFile(null);
+        onAdd(form);
+        onClose();
+      } else {
+        toast.error(result.message || "Failed to add product");
+      }
+    } catch (error) {
+      toast.error("Something went wrong during product addition");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg ">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl text-[#4A654E]">
             Add New Product
@@ -75,111 +104,103 @@ export default function AddProductModal({ open, onClose, onAdd }: Props) {
         </DialogHeader>
 
         <div className="grid gap-4">
-          {/* Product Name */}
           <div>
             <label className="text-sm text-[#434842]">Product Name</label>
             <input
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded focus:ring-1 focus:ring-green-500 outline-none"
               value={form.product_name}
               onChange={(e) => handleChange("product_name", e.target.value)}
             />
           </div>
 
-          <div className="flex justify-between">
-            {/* Category */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-[#434842]">Category</label>
               <select
-                className="border p-2 w-full rounded"
-                value={form.category_name}
-                onChange={(e) => handleChange("category_name", e.target.value)}
+                className="border p-2 w-full rounded outline-none"
+                value={form.category_id}
+                onChange={(e) =>
+                  handleChange("category_id", Number(e.target.value))
+                }
               >
-                <option>Romantic</option>
-                <option>Seasonal</option>
-                <option>Wildflower</option>
-                <option>Wedding</option>
+                <option value={1}>Romantic</option>
+                <option value={2}>Seasonal</option>
+                <option value={3}>Wildflower</option>
+                <option value={4}>Wedding</option>
               </select>
             </div>
-            {/* Status */}
             <div>
               <label className="text-sm text-[#434842]">Status</label>
               <select
-                className="border p-2 w-full rounded"
+                className="border p-2 w-full rounded outline-none"
                 value={form.status}
                 onChange={(e) => handleChange("status", e.target.value)}
               >
-                <option value="in stock">In stock</option>
-                <option value="low stock">Low stock</option>
-                <option value="out of stock">Out of stock</option>
+                <option value="In Stock">In stock</option>
+                <option value="Low Stock">Low stock</option>
+                <option value="Out of Stock">Out of stock</option>
               </select>
             </div>
           </div>
 
-          <div className="flex justify-between gap-4">
-            {/* Price */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-[#434842]">Price</label>
+              <label className="text-sm text-[#434842]">Price (EGP)</label>
               <input
                 type="number"
-                className="border p-2 w-full rounded"
-                value={form.base_price}
-                onChange={(e) =>
-                  handleChange("base_price", Number(e.target.value))
-                }
+                className="border p-2 w-full rounded outline-none"
+                value={form.price}
+                onChange={(e) => handleChange("price", Number(e.target.value))}
               />
             </div>
-
-            {/* Stock */}
             <div>
               <label className="text-sm text-[#434842]">Stock</label>
               <input
                 type="number"
-                className="border p-2 w-full rounded"
+                className="border p-2 w-full rounded outline-none"
                 value={form.stock}
                 onChange={(e) => handleChange("stock", Number(e.target.value))}
               />
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <label className="text-sm text-[#434842]">Description</label>
             <textarea
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded outline-none h-24"
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
             />
           </div>
 
-          {/* Image Upload (UI only) */}
           <div>
             <label className="text-sm text-[#434842]">Product Image</label>
-
             <input
               type="file"
               accept="image/*"
-              className="border p-2 w-full rounded"
+              className="border p-2 w-full rounded text-sm"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
+                setImageFile(file);
 
                 const reader = new FileReader();
-
                 reader.onloadend = () => {
                   handleChange("image", reader.result);
                 };
-
                 reader.readAsDataURL(file);
               }}
             />
-
             {/* Preview */}
             {form.image && (
-              <Image
-                src={form.image}
-                alt="preview"
-                className="mt-2 w-24 h-24 object-cover rounded"
-              />
+              <div className="relative mt-2 w-20 h-20 border rounded overflow-hidden">
+                <Image
+                  src={form.image}
+                  alt="preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
             )}
           </div>
         </div>
@@ -188,16 +209,17 @@ export default function AddProductModal({ open, onClose, onAdd }: Props) {
           <Button
             variant="outline"
             onClick={onClose}
-            className="text-[#434842] rounded-xl"
+            className="text-[#434842] rounded-xl flex-1"
           >
             Cancel
           </Button>
 
           <Button
             onClick={handleSubmit}
-            className="bg-[#C8E6C9] text-[#4E6851] rounded-xl"
+            disabled={loading}
+            className="bg-[#C8E6C9] hover:bg-[#A5D6A7] text-[#4E6851] rounded-xl flex-1"
           >
-            Add Product
+            {loading ? "Adding..." : "Add Product"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -29,8 +29,6 @@ export default async function loginAction(values: LoginFormValues) {
   try {
     const { rememberMe, ...requestData } = values;
 
-    console.log("Sending:", requestData);
-
     const options: AxiosRequestConfig = {
       url: `${API_BASE_URL}/login.php`,
       method: "POST",
@@ -42,17 +40,11 @@ export default async function loginAction(values: LoginFormValues) {
 
     const { data } = await axios.request(options);
 
-    console.log("Raw response:", data);
-    console.log("data.message:", data.message);
-    console.log("data.success:", data.success);
-    console.log("typeof data.message:", typeof data.message);
-
     if (
       data.message === "success" ||
       data.success === true ||
       data.status === "success"
     ) {
-      console.log("Returning success");
       return {
         success: true,
         message: "Welcome Back",
@@ -60,7 +52,6 @@ export default async function loginAction(values: LoginFormValues) {
       };
     }
 
-    console.log("Returning failed - message didn't match");
     return {
       success: false,
       message: data.message || "login failed",
@@ -70,7 +61,6 @@ export default async function loginAction(values: LoginFormValues) {
 
     if (isAxiosError(error)) {
       const errorData = error.response?.data;
-      console.log("Error data:", errorData);
 
       return {
         success: false,

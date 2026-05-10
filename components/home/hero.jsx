@@ -39,9 +39,12 @@ export default function Hero() {
               >
                 Explore Collections
               </Link>
-              <button className="w-full sm:w-auto cursor-pointer border border-flora-green text-flora-green bg-white/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none px-6 py-3.5 sm:py-3 rounded-lg text-sm font-medium hover:border-gray-600 transition text-center">
+              <Link
+                href="/products"
+                className="w-full sm:w-auto cursor-pointer border border-flora-green text-flora-green bg-white/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none px-6 py-3.5 sm:py-3 rounded-lg text-sm font-medium hover:border-gray-600 transition text-center"
+              >
                 Custom Bouquet
-              </button>
+              </Link>
             </div>
           </div>
         </div>

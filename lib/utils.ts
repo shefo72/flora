@@ -5,11 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: string | number): string {
+  const numericValue =
+    typeof value === "string" ? parseFloat(value.replace(/,/g, "")) : value;
+
+  if (isNaN(numericValue)) {
+    return "EGP 0.00";
+  }
+
   return new Intl.NumberFormat("en-EG", {
     style: "currency",
     currency: "EGP",
-  }).format(value);
+    minimumFractionDigits: 2,
+  }).format(numericValue);
 }
 
 export function capitalizeFirstLetter(text?: string): string {
