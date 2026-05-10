@@ -58,9 +58,7 @@ export default function Login() {
         );
 
         toast.success(response.message);
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        router.push("/");
       } else {
         toast.error(response.message || "Login failed");
         console.log("Error message:", response.message);
