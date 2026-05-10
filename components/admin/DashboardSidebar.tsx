@@ -25,6 +25,7 @@ export default function DashboardSidebar() {
   const handleLogout = () => {
     dispatch(logout());
     router.push("/login");
+    router.refresh();
   };
 
   return (
