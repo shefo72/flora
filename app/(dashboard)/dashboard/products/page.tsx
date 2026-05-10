@@ -2,48 +2,76 @@
 
 import { Edit, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { api } from "@/lib/axios";
 
 import DeleteModal from "@/components/DeleteModal";
 import EditProductModal from "@/components/EditProductModal";
 import AddProductModal from "@/components/AddProductModal";
+import {
+  fetchDashboardProducts,
+  deleteProduct,
+} from "@/server/dashboard.server";
+import { toast } from "react-toastify";
+import { formatCurrency } from "@/lib/utils";
+import { clearProductsCache } from "@/server/actions";
 
 export default function ProductsPage() {
   const [productList, setProductList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await api.get("/products.php");
-        setProductList(res.data.data || []);
-      } catch (error) {
-        console.error("Failed to fetch products", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
-
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [addOpen, setAddOpen] = useState(false);
 
-  const handleDelete = async () => {
-    if (!selectedId) return;
+  const refreshProducts = async () => {
     try {
-      setProductList((prev) => prev.filter((p) => p.product_id !== selectedId));
-      setOpen(false);
+      const data = await fetchDashboardProducts();
+      setProductList(data);
     } catch (error) {
-      alert("Error deleting product");
+      toast.error("Error loading products");
     }
   };
 
-  const handleSave = async () => {};
-  const handleAdd = async () => {};
+  useEffect(() => {
+    fetchDashboardProducts()
+      .then((data) => {
+        setProductList(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    try {
+      const result = await deleteProduct(selectedId);
+      if (result.success) {
+        toast.success("Product deleted successfully!");
+        await clearProductsCache();
+        setProductList((prev) =>
+          prev.filter((p) => p.product_id !== selectedId),
+        );
+      } else {
+        toast.error("Failed to delete product from server");
+      }
+      setOpen(false);
+    } catch (error) {
+      toast.error("Error deleting product");
+    }
+  };
+
+  const handleSave = async (updatedProduct: any) => {
+    await clearProductsCache();
+    refreshProducts();
+  };
+
+  const handleAdd = async () => {
+    await clearProductsCache();
+    refreshProducts();
+  };
 
   if (isLoading)
     return <div className="p-10 text-center">Loading Admin Dashboard...</div>;
@@ -81,21 +109,12 @@ export default function ProductsPage() {
         <tbody className="text-[#434842]">
           {productList.map((product) => (
             <tr key={product.product_id} className="border-t">
-              {/* Name */}
               <td className="p-3 font-medium">{product.product_name}</td>
-
-              {/* Category */}
               <td className="p-3">{product.category_name}</td>
-
-              {/* Price */}
-              <td className="p-3">${product.price}</td>
-
-              {/* Status */}
+              <td className="p-3">{formatCurrency(product.price)}</td>
               <td className="p-3">
                 <span
-                //   className={`px-3 py-1 rounded-full text-sm ${
-                //     product.status,
-                // }`}
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${product.status === "Out of Stock" ? "text-red-700 bg-red-100" : product.status === "Low Stock" ? "text-gray-600 bg-gray-200" : "text-green-700 bg-green-100"}`}
                 >
                   {product.status || "No status"}
                 </span>
@@ -139,12 +158,14 @@ export default function ProductsPage() {
 
       {/* Edit Modal */}
       <EditProductModal
+        key={selectedProduct?.product_id || "edit-modal"}
         open={editOpen}
         onClose={() => setEditOpen(false)}
         product={selectedProduct}
         onSave={handleSave}
       />
 
+      {/* Add Modal */}
       <AddProductModal
         open={addOpen}
         onClose={() => setAddOpen(false)}

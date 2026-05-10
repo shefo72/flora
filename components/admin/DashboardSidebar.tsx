@@ -7,6 +7,10 @@ import Image from "next/image";
 import navLogo from "../../public/navLogo.avif";
 import { rasa } from "@/lib/fonts";
 import { Flower, ShoppingBag, Store, LogOut } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { AppDispatch } from "@/store/store";
+import { logout } from "@/store/authSlice";
 
 const navItems = [
   { name: "Orders", path: "/dashboard/orders", icon: ShoppingBag },
@@ -15,8 +19,13 @@ const navItems = [
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const handleLogout = () => {};
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/login");
+  };
 
   return (
     <aside className="w-16 sm:w-64 bg-[#FAFAF9] min-h-screen fixed left-0 top-0 flex flex-col border-r border-gray-200 z-50 transition-all duration-300">

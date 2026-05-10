@@ -40,7 +40,6 @@ export default function Login() {
   const onSubmit: SubmitHandler<LoginFormValues> = async (values) => {
     try {
       const response = await loginAction(values);
-      console.log("Full response:", response);
 
       if (response.success) {
         const userData = {

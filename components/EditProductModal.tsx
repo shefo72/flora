@@ -9,15 +9,19 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import { editProduct } from "@/server/dashboard.server";
 
 type Product = {
   product_id: number;
   product_name: string;
-  category_name: string;
-  base_price: number;
-  status: string;
+  category_id: number;
+  collections: string;
+  price: number;
   stock: number;
+  status: string;
   description: string;
+  image_url: string;
 };
 
 type Props = {
@@ -33,13 +37,8 @@ export default function EditProductModal({
   product,
   onSave,
 }: Props) {
-  const [form, setForm] = useState<Product | null>(null);
-
-  useEffect(() => {
-    if (product) {
-      setForm(product);
-    }
-  }, [product]);
+  const [form, setForm] = useState<Product | null>(product);
+  const [loading, setLoading] = useState(false);
 
   if (!form) return null;
 
@@ -47,9 +46,41 @@ export default function EditProductModal({
     setForm({ ...form, [key]: value });
   };
 
+  const handleEditSubmit = async () => {
+    setLoading(true);
+
+    try {
+      const payload = {
+        product_name: form.product_name,
+        category_id: form.category_id,
+        collections: "Quiet Elegance",
+        price: form.price.toString(),
+        stock: form.stock,
+        status: form.status,
+        description: form.description,
+        image_url: form.image_url,
+      };
+
+      const result = await editProduct(form.product_id, payload);
+
+      if (result.success) {
+        toast.success("Product updated successfully!");
+        onSave(form);
+        onClose();
+      } else {
+        toast.error(result.message || "Failed to update product");
+      }
+    } catch (error) {
+      toast.error("Something went wrong!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="text-2xl">Edit Product</DialogTitle>
           <p className="text-[#434842] pb-3">Update product details</p>
@@ -62,55 +93,58 @@ export default function EditProductModal({
               Product Name
             </label>
             <input
-              className="border p-2 rounded w-full bg-[#C3C8C0]"
+              className="border p-2 rounded w-full outline-none focus:ring-1 focus:ring-green-500"
               value={form.product_name}
               onChange={(e) => handleChange("product_name", e.target.value)}
             />
           </div>
 
-          {/* Category */}
-          <div>
-            <label className="text-sm text-[#434842] mb-1 block">
-              Category
-            </label>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Category */}
+            <div>
+              <label className="text-sm text-[#434842] mb-1 block">
+                Category
+              </label>
+              <select
+                className="border p-2 rounded w-full outline-none"
+                value={form.category_id}
+                onChange={(e) =>
+                  handleChange("category_id", Number(e.target.value))
+                }
+              >
+                <option value={1}>Romantic</option>
+                <option value={2}>Seasonal</option>
+                <option value={3}>Wildflower</option>
+                <option value={4}>Wedding</option>
+              </select>
+            </div>
 
-            <select
-              className="border p-2 rounded w-full bg-[#C3C8C0]"
-              value={form.category_name}
-              onChange={(e) => handleChange("category_name", e.target.value)}
-            >
-              <option value="Romantic">Romantic</option>
-              <option value="Seasonal">Seasonal</option>
-              <option value="Wildflower">Wildflower</option>
-              <option value="Wedding">Wedding</option>
-            </select>
+            {/* Status */}
+            <div>
+              <label className="text-sm text-[#434842] mb-1 block">
+                Status
+              </label>
+              <select
+                className="border p-2 rounded w-full outline-none"
+                value={form.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              >
+                <option value="In Stock">In stock</option>
+                <option value="Low Stock">Low stock</option>
+                <option value="Out of Stock">Out of stock</option>
+              </select>
+            </div>
           </div>
 
-          {/* Status */}
-          <div>
-            <label className="text-sm text-[#434842] mb-1 block">Status</label>
-            <select
-              className="border p-2 rounded w-full bg-[#C3C8C0]"
-              value={form.status}
-              onChange={(e) => handleChange("status", e.target.value)}
-            >
-              <option value="in stock">In stock</option>
-              <option value="low stock">Low stock</option>
-              <option value="out of stock">Out of stock</option>
-            </select>
-          </div>
-
-          <div className="flex justify-between">
+          <div className="grid grid-cols-2 gap-4">
             {/* Price */}
             <div>
               <label className="text-sm text-[#434842] mb-1 block">Price</label>
               <input
                 type="number"
-                className="border p-2 rounded w-full  bg-[#C3C8C0]"
-                value={form.base_price}
-                onChange={(e) =>
-                  handleChange("base_price", Number(e.target.value))
-                }
+                className="border p-2 rounded w-full outline-none"
+                value={form.price}
+                onChange={(e) => handleChange("price", Number(e.target.value))}
               />
             </div>
 
@@ -119,7 +153,7 @@ export default function EditProductModal({
               <label className="text-sm text-[#434842] mb-1 block">Stock</label>
               <input
                 type="number"
-                className="border p-2 rounded w-full  bg-[#C3C8C0]"
+                className="border p-2 rounded w-full outline-none"
                 value={form.stock}
                 onChange={(e) => handleChange("stock", Number(e.target.value))}
               />
@@ -132,7 +166,7 @@ export default function EditProductModal({
               Description
             </label>
             <textarea
-              className="border p-2 rounded w-full bg-[#C3C8C0]"
+              className="border p-2 rounded w-full outline-none h-24"
               value={form.description}
               onChange={(e) => handleChange("description", e.target.value)}
             />
@@ -143,19 +177,17 @@ export default function EditProductModal({
           <Button
             variant="outline"
             onClick={onClose}
-            className="bg-[#EFEDED] text-[#434842] rounded-xl"
+            className="bg-[#EFEDED] text-[#434842] rounded-xl flex-1"
           >
             Cancel
           </Button>
 
           <Button
-            onClick={() => {
-              onSave(form);
-              onClose();
-            }}
-            className="bg-[#C8E6C9] text-[#4E6851] rounded-xl  hover:bg-green-100"
+            onClick={handleEditSubmit}
+            disabled={loading}
+            className="bg-[#C8E6C9] text-[#4E6851] rounded-xl hover:bg-green-100 flex-1"
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>

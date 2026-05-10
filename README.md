@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Flora Store — Botanical E-commerce Platform 🌿
 
-## Getting Started
+A modern Next.js storefront for a botanical shop with customer shopping, protected routes, and a dedicated admin dashboard. Flora Store blends elegant product browsing, role-based authentication, cart checkout, and admin product/order management into a polished experience.
 
-First, run the development server:
+---
+
+## 🌼 Project Description
+
+Flora Store is an e-commerce platform built for a floral boutique. It offers customer-facing pages for browsing products, searching by category, adding items to cart, and completing checkout. The application also includes a secure admin dashboard where administrators can manage products, perform full product CRUD, and view/manage recent orders.
+
+---
+
+## 🧰 Tech Stack
+
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Redux Toolkit**
+- **React Hook Form**
+- **Zod**
+- **Axios**
+- **Lucide React**
+- **shadcn UI**
+- **ESLint**
+
+---
+
+## ✨ Key Features
+
+- **Customer Authentication** with login and signup flows
+- **Role-Based Access Control** for users and admins
+- **Protected Routes** for cart, checkout, and admin pages
+- **Product Catalog** with search and category filtering
+- **Shopping Cart** with quantity updates and item removal
+- **Checkout Flow** with shipping and payment form handling
+- **Remote API Integration** via `NEXT_PUBLIC_API_URL`
+- **Responsive UI** across desktop and mobile
+- **Redux state management** for cart and authentication state
+
+---
+
+## 🛠️ Admin Dashboard Features
+
+The admin dashboard provides a polished management experience for the botanical store:
+
+- Full **product management** with:
+  - **Add Product**
+  - **Edit Product**
+  - **Delete Product**
+- **Orders management** for recent order tracking, status updates, and order removal
+- Secure admin-only access using `AdminGuard`
+- Sidebar navigation for easy dashboard flow
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+ installed
+- npm
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Environment
+
+Create a `.env` file in the project root with the API endpoint:
+
+```env
+NEXT_PUBLIC_API_URL=https://floraapi-production-e891.up.railway.app/api
+```
+
+### Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser at: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Folder Structure Overview
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+.
+├── app/
+│   ├── (main)/
+│   │   ├── cart/
+│   │   ├── checkout/
+│   │   ├── login/
+│   │   ├── products/
+│   │   └── signup/
+│   ├── (dashboard)/
+│   └── layout.tsx
+├── components/
+│   ├── Guards/
+│   ├── admin/
+│   ├── home/
+│   ├── providers/
+│   └── ui/
+├── data/
+├── lib/
+├── schema/
+├── server/
+├── store/
+├── public/
+├── package.json
+├── tsconfig.json
+└── README.md
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 💡 Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Admin pages are protected and only available to authenticated users with the admin role.
+- The storefront relies on an external API for products, authentication, signup, cart, and checkout.
+- Forms use validation with **React Hook Form** and **Zod** for a consistent user experience.
+- Tailwind CSS and shadcn UI patterns drive the app’s visual design.
