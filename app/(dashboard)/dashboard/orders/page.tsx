@@ -41,14 +41,15 @@ export default function OrdersPage() {
   };
 
   const getStatusStyle = (status: any) => {
+    // تم تعديل الكلمات هنا عشان تتطابق مع الحروف الـ Capital
     switch (status) {
-      case "processing":
+      case "Processing":
         return "bg-[#4C6247] text-[#000000] border-[#4C6247CF]";
 
-      case "out for delivery":
+      case "Out for Delivery":
         return "bg-[#FFFFFF] text-[#4C6247] border-[#4C6247]";
 
-      case "delivered":
+      case "Delivered":
         return "bg-[#4C624757] text-flora-green border-[#4C6247]";
 
       default:
@@ -59,19 +60,19 @@ export default function OrdersPage() {
   if (loading) return <div className="p-10 text-center">Loading...</div>;
   return (
     <div className="w-full">
-      <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-flora-green">
+      <h1 className="mb-4 text-xl font-bold md:mb-6 md:text-2xl text-flora-green">
         Orders Management
       </h1>
 
-      <div className="w-full overflow-x-auto border rounded-lg bg-white shadow-sm">
-        <table className="w-full min-w-187.5 overflow-hidden">
+      <div className="w-full overflow-x-auto bg-white border rounded-lg shadow-sm">
+        <table className="overflow-hidden w-full min-w-187.5">
           <thead className="bg-[#3E6C4D42] text-left text-base md:text-xl text-flora-green">
             <tr>
-              <th className="p-3 md:p-4 whitespace-nowrap">Order ID</th>
-              <th className="p-3 md:p-4 whitespace-nowrap">Date</th>
-              <th className="p-3 md:p-4 whitespace-nowrap">Customer</th>
-              <th className="p-3 md:p-4 whitespace-nowrap">Status</th>
-              <th className="p-3 md:p-4 whitespace-nowrap">Total</th>
+              <th className="p-3 whitespace-nowrap md:p-4">Order ID</th>
+              <th className="p-3 whitespace-nowrap md:p-4">Date</th>
+              <th className="p-3 whitespace-nowrap md:p-4">Customer</th>
+              <th className="p-3 whitespace-nowrap md:p-4">Status</th>
+              <th className="p-3 whitespace-nowrap md:p-4">Total</th>
             </tr>
           </thead>
 
@@ -79,19 +80,19 @@ export default function OrdersPage() {
             {orders.map((order) => (
               <tr
                 key={order.order_id}
-                className="border-t text-flora-green hover:bg-gray-50/50 transition-colors"
+                className="transition-colors border-t text-flora-green hover:bg-gray-50/50"
               >
-                <td className="p-3 md:p-4 whitespace-nowrap">
+                <td className="p-3 whitespace-nowrap md:p-4">
                   {order.order_id}
                 </td>
-                <td className="p-3 md:p-4 whitespace-nowrap">
+                <td className="p-3 whitespace-nowrap md:p-4">
                   {order.order_date}
                 </td>
-                <td className="p-3 md:p-4 whitespace-nowrap">
+                <td className="p-3 whitespace-nowrap md:p-4">
                   {order.customer_name}
                 </td>
 
-                <td className="p-3 md:p-4 whitespace-nowrap relative">
+                <td className="relative p-3 whitespace-nowrap md:p-4">
                   <select
                     disabled={updatingId === order.raw_order_id}
                     value={order.status}
@@ -108,16 +109,16 @@ export default function OrdersPage() {
                         : "opacity-100"
                     } ${getStatusStyle(order.status)}`}
                   >
-                    <option value="processing">Processing</option>
-                    <option value="out for delivery">Out for delivery</option>
-                    <option value="delivered">Delivered</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
                   </select>
 
                   {updatingId === order.raw_order_id && (
-                    <span className="absolute right-0 top-1/2 -translate-y-1/2 animate-spin h-4 w-4 border-2 border-green-600 border-t-transparent rounded-full"></span>
+                    <span className="absolute w-4 h-4 border-2 border-green-600 rounded-full right-0 top-1/2 -translate-y-1/2 animate-spin border-t-transparent"></span>
                   )}
                 </td>
-                <td className="p-3 md:p-4 whitespace-nowrap">
+                <td className="p-3 whitespace-nowrap md:p-4">
                   {formatCurrency(order.order_total)}
                 </td>
               </tr>

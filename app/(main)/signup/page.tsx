@@ -68,8 +68,8 @@ export default function SignUp() {
 
   return (
     <>
-      <div className="flex h-screen w-full overflow-hidden bg-[#F9F7F2]">
-        <div className="flex h-full w-full flex-col md:w-1/2">
+      <div className="flex h-full w-full items-center  bg-[#F9F7F2]">
+        <div className="flex h-full w-full flex-col md:w-1/2 mb-4 md:mb-0">
           <div className="flex h-full flex-col justify-center px-8 md:px-16 lg:px-24">
             <div className="mx-auto w-full max-w-md">
               <h1 className="mb-1 text-2xl font-normal text-[#2D2D2D] lg:mb-2 lg:text-3xl">
@@ -155,20 +155,6 @@ export default function SignUp() {
                   )}
                 </div>
 
-                {/* <div className="flex items-start gap-2 pt-1 lg:gap-3 lg:pt-2">
-                  <div className="relative flex items-center">
-                    <input type="checkbox" id="terms" className='accent-green-600'
-                      {...register("terms")} />
-                            <label htmlFor="terms">
-                                <span className='mb-1  text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs'>I agree to the </span>
-                                <a href={"#"} className='mb-1 text-[10px] font-medium uppercase tracking-wider text-[#76ae76] lg:mb-2 lg:text-xs underline'>Terms</a>
-                                <span className='mb-1  text-[10px] font-medium uppercase tracking-wider text-[#4A4A4A] lg:mb-2 lg:text-xs'> and</span>
-                                <a href={"#"} className='mb-1 text-[10px] font-medium uppercase tracking-wider text-[#76ae76] lg:mb-2 lg:text-xs underline'> Privacy Policy</a>
-                            </label>
-                  </div>
-                </div>
-                    {errors.terms && <p className="mt-0.5 text-[10px] text-red-500 lg:text-xs">{errors.terms.message}</p>} */}
-
                 <BrandButton type="submit">Create Account</BrandButton>
 
                 <div className="relative flex items-center py-1 lg:py-2">
@@ -226,7 +212,6 @@ export default function SignUp() {
             </div>
           </div>
         </div>
-
         <div className="relative hidden h-full w-1/2 md:block">
           <Image
             src={signupImage}
